@@ -403,7 +403,4 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
-    if (process.env.ENABLE_BOT === 'true') {
-        initTelegramBot();
-    }
 });
