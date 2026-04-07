@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Ошибка 500 | Критический сбой' }) %>
+    <link rel="stylesheet" href="/css/error.css">
+</head>
+<body class="theme-500">
+    <%- include('partials/navbar') %>
+
+    <div class="cyber-bg">
+        <div class="bg-grid"></div>
+        <div class="bg-glow"></div>
+        <div class="danger-overlay"></div>
+    </div>
+
+    <main class="error-wrapper">
+        <div class="error-card">
+            <div class="error-header">
+                <div class="glitch-wrapper">
+                    <h1 class="glitch" data-text="500">500</h1>
+                </div>
+                <div class="error-badge alert">КРИТИЧЕСКИЙ СБОЙ ЯДРА</div>
+            </div>
+            
+            <p class="error-desc">
+                Внутренняя ошибка сервера. Соединение с сервером потеряно.<br>
+                Наши инженеры уже получили лог ошибки и приступили к отладке.
+            </p>
+            
+            <div class="arcade-monitor">
+                <div class="monitor-glass"></div>
+                <div class="terminal-container" id="terminal">
+                    </div>
+            </div>
+
+            <div class="error-actions">
+                <button onclick="window.location.reload()" class="btn-home pulse-btn btn-danger">
+                    <i class="fas fa-sync-alt"></i> ПЕРЕЗАГРУЗИТЬ МАТРИЦУ
+                </button>
+            </div>
+
+            <% if (typeof error !== 'undefined' && error && process.env.NODE_ENV === 'development') { %>
+                <div class="dev-error-box">
+                    <div class="dev-title">DEBUG INFO (Visible only in DEV):</div>
+                    <code><%= error.message %></code>
+                </div>
+            <% } %>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+    
+    <script nonce="<%= nonce %>">
+        const lines = [
+            "Initializing diagnostic sequence...",
+            "[ <span class='txt-success'>OK</span> ] Connecting to Core",
+            "[ <span class='txt-success'>OK</span> ] Verifying Bearer Tokens",
+            "[ <span class='txt-danger'>FAIL</span> ] Database cluster response timeout",
+            "Retrying connection (Attempt 1/3)...",
+            "[ <span class='txt-danger'>FATAL</span> ] Exception in core module: Unhandled Promise Rejection",
+            "Dumping memory stack...",
+            "Sending automated report to Admins... [ <span class='txt-success'>SENT</span> ]",
+            "Safe mode activated. Please stand by."
+        ];
+        
+        const term = document.getElementById('terminal');
+        let lineIndex = 0;
+
+        function typeLine() {
+            if (lineIndex < lines.length) {
+                const p = document.createElement('div');
+                p.className = 'term-line';
+                p.innerHTML = `<span class="term-prefix">&gt;</span> ${lines[lineIndex]}`;
+                
+                const oldCursor = document.querySelector('.terminal-cursor');
+                if(oldCursor) oldCursor.remove();
+
+                term.appendChild(p);
+
+                const cursor = document.createElement('span');
+                cursor.className = 'terminal-cursor';
+                cursor.innerText = '█';
+                term.appendChild(cursor);
+
+                term.scrollTop = term.scrollHeight; 
+
+                let delay = Math.random() * 400 + 200;
+                if(lines[lineIndex].includes('FAIL') || lines[lineIndex].includes('FATAL')) delay = 1200;
+                
+                lineIndex++;
+                setTimeout(typeLine, delay);
+            }
+        }
+        setTimeout(typeLine, 800);
+    </script>
+</body>
+</html>

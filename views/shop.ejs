@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: title }) %>
+    <link rel="stylesheet" href="/css/shop.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="shop-wrapper">
+        <header class="shop-header">
+            <div class="shop-title">
+                <h1>🛒 Торговая площадка</h1>
+                <p>Трать заработанные Звёзды на крутые улучшения и косметику</p>
+            </div>
+
+            <div class="shop-balance-card">
+                <span>Ваш баланс:</span>
+                <strong id="userBalance"><%= Math.floor(profile.stars).toLocaleString() %> ⭐</strong>
+            </div>
+        </header>
+
+        <nav class="shop-tabs">
+            <button class="tab-btn active" data-filter="all">Всё подряд</button>
+            <button class="tab-btn" data-filter="lootbox">Кейсы и Ключи</button>
+            <button class="tab-btn" data-filter="consumable">Бустеры</button>
+            <button class="tab-btn" data-filter="cosmetic">Косметика</button>
+            <button class="tab-btn" data-filter="material">Материалы</button>
+        </nav>
+
+        <div class="shop-grid">
+            <% 
+                const typeMap = { 'material': 'Ресурс', 'lootbox': 'Лутбокс', 'consumable': 'Расходник', 'background': 'Фон', 'frame': 'Рамка', 'role': 'Роль', 'key': 'Ключ' };
+            %>
+            <% shopItems.forEach(item => { %>
+                <div class="s-card <%= item.rarity %>" data-category="<%= item.type %>">
+                    <div class="s-visual">
+                        <% if (item.imageUrl) { %>
+                            <img src="<%= item.imageUrl %>" class="s-img" alt="<%= item.name %>" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div class="s-emoji" style="display: none;"><%- item.displayIcon %></div>
+                        <% } else { %>
+                            <div class="s-emoji"><%- item.displayIcon %></div>
+                        <% } %>
+                        <div class="s-type-badge"><%= typeMap[item.type] || item.type %></div>
+                    </div>
+                    
+                    <div class="s-info">
+                        <h3><%= item.name %></h3>
+                        <p><%= item.description %></p>
+                    </div>
+
+                    <div class="s-buy-zone">
+                        <div class="s-price"><%= item.price.toLocaleString() %> ⭐</div>
+                        <button class="btn-buy" onclick="openBuyModal('<%= item.id %>')">Купить</button>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+
+    <div id="buyModal" class="modal-overlay">
+        <div class="modal-content buy-modal-box">
+            <button class="close-btn" onclick="closeBuyModal()"><i class="fas fa-times"></i></button>
+            
+            <div id="buyIcon" class="buy-icon-preview"></div>
+            <h2 id="buyName">Название предмета</h2>
+            
+            <div class="qty-selector">
+                <button class="qty-btn" onclick="changeQty(-1)"><i class="fas fa-minus"></i></button>
+                <input type="number" id="buyQty" value="1" min="1" max="100" onchange="updateTotal()">
+                <button class="qty-btn" onclick="changeQty(1)"><i class="fas fa-plus"></i></button>
+            </div>
+
+            <div class="buy-total">
+                Итого к оплате: <strong id="buyTotal">0</strong> ⭐
+            </div>
+
+            <button class="btn-pay full-width" id="confirmBuyBtn" onclick="processPurchase()">ОПЛАТИТЬ</button>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>">
+        const shopData = <%- JSON.stringify(shopItems || []) %>;
+        
+        let currentBuyItem = null;
+        let currentBuyPrice = 0;
+        const userBalance = <%= Math.floor(profile.stars) %>;
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const filter = btn.dataset.filter;
+                document.querySelectorAll('.s-card').forEach(card => {
+                    const cat = card.dataset.category;
+                    let match = false;
+                    
+                    if (filter === 'all') match = true;
+                    else if (filter === 'cosmetic' && ['background', 'frame', 'role'].includes(cat)) match = true;
+                    else if (filter === 'lootbox' && ['lootbox', 'key'].includes(cat)) match = true;
+                    else if (cat === filter) match = true;
+                    
+                    card.style.display = match ? 'flex' : 'none';
+                });
+            });
+        });
+
+        function openBuyModal(itemId) {
+            const item = shopData.find(i => i.id === itemId);
+            if (!item) return;
+
+            currentBuyItem = item.id;
+            currentBuyPrice = item.price;
+            
+            document.getElementById('buyName').innerText = item.name;
+            
+            if (item.imageUrl) {
+                document.getElementById('buyIcon').innerHTML = `<img src="${item.imageUrl}" class="modal-buy-img" alt="${item.name}">`;
+            } else {
+                document.getElementById('buyIcon').innerHTML = item.displayIcon;
+            }
+            
+            document.getElementById('buyQty').value = 1;
+            updateTotal();
+            
+            document.getElementById('buyModal').classList.add('active');
+        }
+
+        function closeBuyModal() {
+            document.getElementById('buyModal').classList.remove('active');
+        }
+
+        document.getElementById('buyModal').addEventListener('click', (e) => {
+            if (e.target.id === 'buyModal') closeBuyModal();
+        });
+
+        function changeQty(delta) {
+            const input = document.getElementById('buyQty');
+            let val = parseInt(input.value) + delta;
+            if (val < 1) val = 1;
+            if (val > 100) val = 100;
+            input.value = val;
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const qty = parseInt(document.getElementById('buyQty').value) || 1;
+            const total = qty * currentBuyPrice;
+            const totalEl = document.getElementById('buyTotal');
+            totalEl.innerText = total.toLocaleString();
+
+            const btn = document.getElementById('confirmBuyBtn');
+            if (total > userBalance) {
+                totalEl.style.color = '#ff4d4d';
+                btn.disabled = true;
+                btn.innerText = 'НЕДОСТАТОЧНО ЗВЁЗД';
+            } else {
+                totalEl.style.color = '#ffd700';
+                btn.disabled = false;
+                btn.innerText = 'ОПЛАТИТЬ';
+            }
+        }
+
+        async function processPurchase() {
+            const qty = parseInt(document.getElementById('buyQty').value) || 1;
+            const btn = document.getElementById('confirmBuyBtn');
+            
+            btn.disabled = true;
+            btn.innerText = 'ОБРАБОТКА...';
+
+            try {
+                const res = await fetch('/api/shop/buy', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ itemId: currentBuyItem, quantity: qty })
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    if (typeof Modal !== 'undefined') await Modal.alert("Успешно", result.message, "success");
+                    else alert(result.message);
+                    location.reload();
+                } else {
+                    if (typeof Modal !== 'undefined') Modal.alert("Ошибка", result.error, "error");
+                    else alert(result.error);
+                    btn.disabled = false;
+                    updateTotal();
+                }
+            } catch (e) {
+                if (typeof Modal !== 'undefined') Modal.alert("Ошибка", "Сбой сети", "error");
+                else alert("Ошибка сети");
+                btn.disabled = false;
+                updateTotal();
+            }
+        }
+    </script>
+</body>
+</html>

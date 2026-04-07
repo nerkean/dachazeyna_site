@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Wiki Admin | List' }) %>
+    <style>
+        :root {
+            --bg-main: #0f1115;
+            --card-bg: #1e212b;
+            --card-border: rgba(255, 255, 255, 0.06);
+            --accent: #5865F2;
+            --accent-glow: rgba(88, 101, 242, 0.2);
+            --danger: #ed4245;
+            --text-main: #f2f3f5;
+            --text-muted: #a3a6aa;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .admin-wrap { 
+            max-width: 1000px; 
+            margin: 100px auto 60px; 
+            padding: 0 20px; 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .admin-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 35px; 
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .admin-header h1 {
+            color: var(--text-main);
+            font-size: 2rem;
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+        .btn-primary:hover {
+            background: #4752c4;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        .art-list { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+        
+        .art-row {
+            background: var(--card-bg); 
+            padding: 16px 20px; 
+            border-radius: 14px; 
+            border: 1px solid var(--card-border);
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+        
+        .art-row:hover { 
+            border-color: rgba(88, 101, 242, 0.4); 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            background: #232733;
+        }
+
+        .art-info { 
+            display: flex; 
+            align-items: center; 
+            gap: 18px; 
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .art-icon { 
+            width: 48px; 
+            height: 48px; 
+            background: var(--accent-glow); 
+            color: var(--accent); 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.4rem; 
+            flex-shrink: 0;
+        }
+        
+        .art-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow: hidden;
+        }
+
+        .art-title { 
+            font-weight: 700; 
+            color: var(--text-main); 
+            font-size: 1.15rem; 
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .art-meta { 
+            color: var(--text-muted); 
+            font-size: 0.85rem; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            font-weight: 700;
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            letter-spacing: 0.5px;
+        }
+        .badge-cat { 
+            background: rgba(255,255,255,0.08); 
+            color: var(--text-main); 
+        }
+        .badge-hidden {
+            background: rgba(237, 66, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(237, 66, 69, 0.2);
+        }
+        
+        .art-actions { 
+            display: flex; 
+            gap: 8px; 
+            flex-shrink: 0;
+        }
+        
+        .btn-sm { 
+            width: 38px;
+            height: 38px;
+            border-radius: 10px; 
+            font-size: 1rem; 
+            border: none; 
+            cursor: pointer; 
+            text-decoration: none; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: var(--transition); 
+        }
+        
+        .btn-view { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+        .btn-view:hover { background: rgba(255,255,255,0.15); color: #fff; }
+        
+        .btn-edit { background: rgba(88, 101, 242, 0.1); color: var(--accent); }
+        .btn-edit:hover { background: var(--accent); color: #fff; }
+        
+        .btn-del { background: rgba(237, 66, 69, 0.1); color: var(--danger); }
+        .btn-del:hover { background: var(--danger); color: #fff; }
+
+        @media (max-width: 650px) {
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .art-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .art-actions {
+                width: 100%;
+                justify-content: flex-end;
+                padding-top: 10px;
+                border-top: 1px solid var(--card-border);
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="admin-wrap">
+        <div class="admin-header">
+            <h1>Wiki Менеджер</h1>
+            <a href="/admin/wiki/new" class="btn-primary"><i class="fas fa-plus"></i> Создать статью</a>
+        </div>
+
+        <div class="art-list">
+            <% if (articles.length === 0) { %>
+                <div style="text-align:center; padding: 40px; background: var(--card-bg); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.1);">
+                    <i class="fas fa-folder-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 15px;"></i>
+                    <p style="color:var(--text-muted); font-size: 1.1rem; margin: 0;">Статей пока нет.</p>
+                </div>
+            <% } %>
+
+            <% articles.forEach(art => { %>
+                <div class="art-row" id="row-<%= art._id %>">
+                    <div class="art-info">
+                        <div class="art-icon"><i class="<%= art.icon || 'fas fa-file-alt' %>"></i></div>
+                        <div class="art-details">
+                            <div class="art-title">
+                                <%= art.title %>
+                                <span class="badge badge-cat"><%= art.category %></span>
+                                <% if (!art.isPublished) { %>
+                                    <span class="badge badge-hidden"><i class="fas fa-eye-slash"></i> Скрыто</span>
+                                <% } %>
+                            </div>
+                            <div class="art-meta">
+                                <span><i class="fas fa-link"></i> /wiki/<%= art.slug %></span>
+                                <span>•</span>
+                                <span><i class="fas fa-chart-line"></i> <%= art.views %> просмотров</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="art-actions">
+                        <a href="/wiki/<%= art.slug %>" target="_blank" class="btn-sm btn-view" title="Смотреть"><i class="fas fa-eye"></i></a>
+                        <a href="/admin/wiki/edit/<%= art._id %>" class="btn-sm btn-edit" title="Редактировать"><i class="fas fa-pen"></i></a>
+                        <button onclick="deleteArticle('<%= art._id %>')" class="btn-sm btn-del" title="Удалить"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>">
+        async function deleteArticle(id) {
+            if(!confirm('Удалить статью? Это действие нельзя отменить.')) return;
+            
+            const row = document.getElementById('row-' + id);
+            row.style.opacity = '0.5';
+            row.style.pointerEvents = 'none';
+            
+            try {
+                const res = await fetch('/api/admin/wiki/delete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id })
+                });
+                if (res.ok) {
+                    row.style.transform = 'scale(0.95)';
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 250);
+                } else {
+                    row.style.opacity = '1';
+                    row.style.pointerEvents = 'all';
+                    alert('Ошибка удаления');
+                }
+            } catch(e) { 
+                row.style.opacity = '1';
+                row.style.pointerEvents = 'all';
+                alert('Ошибка сети'); 
+            }
+        }
+    </script>
+</body>
+</html>

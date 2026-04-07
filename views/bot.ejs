@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Система Организатор | Дача Зейна' }) %>
+<link rel="preload" href="/css/bot.css" as="style">
+    <link rel="stylesheet" href="/css/bot.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <section class="bot-hero">
+        <div class="hero-content">
+    <div class="sys-badge">
+        <span class="dot green"></span> СИСТЕМА ОНЛАЙН
+    </div>
+    <h1 class="animate-appear"><span class="text-gradient">ОРГАНИЗАТОР</span></h1>
+            <p class="hero-desc">
+                Эксклюзивная разработка для нашего сервера. "Организатор" — это не просто бот, а экосистема, которая делает наше общение интересным, экономику живой, а ивенты — честными.
+            </p>
+            
+            <div class="hero-actions">
+                <a href="/profile" class="btn-primary big glow-effect">
+                    <i class="fas fa-user-circle"></i> Мой Профиль
+                </a>
+                <a href="/leaderboard" class="btn-secondary big">
+                    <i class="fas fa-trophy"></i> Топ Игроков
+                </a>
+            </div>
+        </div>
+
+        <div class="system-monitor-wrapper" data-aos="fade-left">
+            <div class="system-monitor">
+                <div class="monitor-header">
+                    <div class="win-title"><i class="fas fa-server"></i> organizer_core.exe @ dacha_zeyna</div>
+                    <div class="win-controls"><span></span><span></span><span></span></div>
+                </div>
+                <div class="monitor-body">
+                    <div class="monitor-grid">
+                        <div class="m-card">
+                            <div class="m-label">SERVER</div>
+                            <div class="m-val">ДАЧА ЗЕЙНА</div>
+                            <div class="m-bar"><div class="fill" style="width: 100%"></div></div>
+                        </div>
+                        <div class="m-card">
+                            <div class="m-label">STATUS</div>
+                            <div class="m-val success">ЗАЩИЩЁН</div>
+                            <div class="m-bar"><div class="fill success" style="width: 100%"></div></div>
+                        </div>
+                    </div>
+                    <div class="console-output" id="consoleText">
+                        <p><span class="time">[SYS]</span> Access granted. Welcome, Resident.</p>
+                        <p><span class="time">[ECO]</span> Market volatility: <span class="warn">HIGH</span></p>
+                        <p><span class="time">[LOG]</span> <span class="item">New User</span> joined the voice channel.</p>
+                        <p><span class="time">[CMD]</span> Executing /profile...</p>
+                        <p class="typing-line"><span class="cursor">_</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="monitor-glow"></div>
+        </div>
+    </section>
+
+        <section class="features-section">
+        <div class="section-title center" data-aos="fade-up">
+            <h2>Экосистема сервера</h2>
+            <p>Три кита, на которых держится геймплей</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feat-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feat-icon color-1"><i class="fas fa-hammer"></i></div>
+                <h3>Крафт и инвентарь</h3>
+                <p>Собирайте ресурсы, создавайте редкие предметы на верстаке и используйте расходники для буста опыта.</p>
+            </div>
+            
+            <div class="feat-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feat-icon color-2"><i class="fas fa-chart-pie"></i></div>
+                <h3>Глобальный рынок</h3>
+                <p>Торгуйте акциями, следите за курсом валют и станьте богатейшим магнатом сервера.</p>
+            </div>
+            
+            <div class="feat-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feat-icon color-3"><i class="fas fa-shield-alt"></i></div>
+                <h3>Умная защита</h3>
+                <p>Автоматическая система предупреждений и мутов обеспечивает комфортное общение без токсичности.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="showcase-section finance-mode">
+        <div class="bg-grid"></div>
+        
+        <div class="showcase-container">
+            <div class="showcase-text" data-aos="fade-right">
+                <div class="tag-label text-neon">ФИНАНСЫ</div>
+                <h2>Рынок акций <span class="h-badge">LIVE</span></h2>
+                <p class="lead">
+                    Экономика реагирует на каждый вздох. 
+                    Инвестируйте в $VOICE и $TXT, следите за трендами и богатейте вместе с друзьями.
+                </p>
+                <ul class="feature-list cyber-list">
+                    <li>
+                        <div class="f-icon-box"><i class="fas fa-chart-line"></i></div>
+                        <div><strong>Трейдинг:</strong> покупай дешево, продавай дорого.</div>
+                    </li>
+                    <li>
+                        <div class="f-icon-box"><i class="fas fa-robot"></i></div>
+                        <div><strong>Авто-брокер:</strong> умная система инфляции.</div>
+                    </li>
+                </ul>
+                <a href="/market" class="btn-cyber mt-20">
+                    <span class="btn-text">ОТКРЫТЬ ТЕРМИНАЛ</span>
+                </a>
+            </div>
+            
+            <div class="showcase-visual" data-aos="zoom-in">
+                <div class="cyber-terminal">
+                    <div class="ct-header">
+                        <div class="ct-buttons">
+                            <span class="ct-dot red"></span>
+                            <span class="ct-dot yellow"></span>
+                            <span class="ct-dot green"></span>
+                        </div>
+                        <div class="ct-title">MARKET_V2.exe</div>
+                        <div class="ct-status">● LIVE</div>
+                    </div>
+
+                    <div class="ct-screen">
+                        <div class="ct-grid-overlay"></div>
+                        <div class="ct-scanline"></div>
+
+                        <div class="ct-ticker-tape">
+                            <div class="tape-content">
+                                <span>$VOICE <span class="up">▲ 142.5</span></span>
+                                <span>$TXT <span class="down">▼ 89.2</span></span>
+                                <span>$IMG <span class="up">▲ 12.0</span></span>
+                                <span>$ROLE <span class="down">▼ 45.0</span></span>
+                            </div>
+                        </div>
+
+                        <div class="ct-graph-area">
+                            <div class="graph-overlay-info">
+                                <div class="gi-item">
+                                    <label>ТЕКУЩАЯ ЦЕНА</label>
+                                    <strong>142.50 ⭐</strong>
+                                </div>
+                            </div>
+                            
+                            <svg viewBox="0 0 300 100" class="ct-svg">
+                                <line x1="0" y1="25" x2="300" y2="25" class="grid-line"/>
+                                <line x1="0" y1="50" x2="300" y2="50" class="grid-line"/>
+                                <line x1="0" y1="75" x2="300" y2="75" class="grid-line"/>
+
+                                <path d="M0,80 L30,75 L60,60 L90,65 L120,40 L150,50 L180,30 L210,35 L240,20 L270,25 L300,10" 
+                                      class="ct-path-line" />
+                                
+                                <path d="M0,80 L30,75 L60,60 L90,65 L120,40 L150,50 L180,30 L210,35 L240,20 L270,25 L300,10 V100 H0 Z" 
+                                      class="ct-path-fill" />
+
+                                <circle cx="120" cy="40" r="3" class="ct-point" />
+                                <circle cx="180" cy="30" r="3" class="ct-point delay-1" />
+                                <circle cx="240" cy="20" r="3" class="ct-point delay-2" />
+                                <circle cx="300" cy="10" r="5" class="ct-point-end" />
+                            </svg>
+                        </div>
+
+                        <div class="ct-footer">
+                            <div class="sys-msg">
+                                <span class="typing-anim">РАСЧЕТ ВОЛАТИЛЬНОСТИ...</span>
+                            </div>
+                            <div class="load-bar">
+                                <div class="load-progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="showcase-section social-mode">
+        <div class="blob blob-1"></div>
+
+        <div class="showcase-container reverse">
+            <div class="showcase-visual" data-aos="fade-right">
+                <div class="visual-card social-hub">
+                    <div class="hub-profile">
+                        <div class="hub-banner"></div>
+                        <div class="hub-avatar">
+                           <img 
+    src="assets/img/avatars/default_avatar.png" 
+    alt="User Avatar" 
+    width="80" height="80"
+    loading="lazy"
+>
+                            <div class="hub-status"></div>
+                        </div>
+                        <div class="hub-identity">
+                            <h3>Организатор</h3>
+                            <span class="hub-tag">@user • Бот</span>
+                        </div>
+                        <div class="hub-stats">
+                            <div class="hs-item">
+                                <b>150 ⭐</b> <small>Баланс</small>
+                            </div>
+                            <div class="hs-item">
+                                <b>+3</b> <small>Репутация</small>
+                            </div>
+                            <div class="hs-item">
+                                <b>Топ 1</b> <small>Место</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hub-marriage">
+                        <div class="hm-icon"><i class="fas fa-heart pulse-heart"></i></div>
+                        <div class="hm-content">
+                            <span class="hm-label">В отношениях с</span>
+                            <span class="hm-partner">Alina</span>
+                        </div>
+                        <div class="hm-bonus">+15% STARS</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="showcase-text" data-aos="fade-left">
+                <div class="tag-label text-pink">СОЦИУМ</div>
+                <h2>Твой цифровой статус</h2>
+                <p class="lead">
+                    Преврати профиль в визитную карточку. 
+                    Найди пару, чтобы получать бонусы к опыту и валюте.
+                </p>
+                <ul class="feature-list glass-list">
+                    <li>
+                        <i class="fas fa-id-card"></i>
+                        <span><strong>Профиль:</strong> настраиваемые фоны и рамки.</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-ring"></i>
+                        <span><strong>Браки:</strong> общий счет, приватные каналы и бонусы.</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-thumbs-up"></i>
+                        <span><strong>Репутация:</strong> заслужи уважение сервера.</span>
+                    </li>
+                </ul>
+                <a href="/profile" class="btn-glass mt-20">
+                    Мой профиль <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="showcase-section quest-mode">
+        <div class="showcase-container">
+            <div class="showcase-text" data-aos="fade-right">
+                <div class="tag-label text-gold">ПРОГРЕСС</div>
+                <h2>Система достижений</h2>
+                <p class="lead">
+                    Всегда есть цель. Выполняй ежедневные задания, собирай уникальные медали и получай ресурсы для крафта.
+                </p>
+                <ul class="feature-list gold-list">
+                    <li>
+                        <div class="f-icon-box gold"><i class="fas fa-scroll"></i></div>
+                        <div><strong>Дейлики:</strong> 3 новых задания каждые 24 часа.</div>
+                    </li>
+                    <li>
+                        <div class="f-icon-box gold"><i class="fas fa-trophy"></i></div>
+                        <div><strong>Трофеи:</strong> редкие значки в профиль за подвиги.</div>
+                    </li>
+                </ul>
+                <a href="/profile" class="btn-gold mt-20">Мои задания</a>
+            </div>
+            
+            <div class="showcase-visual" data-aos="zoom-in">
+                <div class="visual-card quest-card wide">
+                    <div class="floating-medal">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <div class="qc-header">
+                        <span>QUEST_LOG</span>
+                        <div class="qc-timer"><i class="fas fa-clock"></i> 14:02:59</div>
+                    </div>
+                    <div class="qc-grid">
+                        <div class="qc-item completed">
+                            <div class="qc-icon"><i class="fas fa-check"></i></div>
+                            <div class="qc-content">
+                                <div class="qc-top">
+                                    <span class="qc-title">Voice Walker</span>
+                                    <span class="qc-reward-badge">+50 ⭐</span>
+                                </div>
+                                <div class="qc-bar-wrap">
+                                    <div class="qc-bar" style="width: 100%; background: #2ecc71;"></div>
+                                </div>
+                                <div class="qc-meta">60 / 60 мин</div>
+                            </div>
+                        </div>
+                        <div class="qc-item active">
+                            <div class="qc-icon"><i class="fas fa-fire"></i></div>
+                            <div class="qc-content">
+                                <div class="qc-top">
+                                    <span class="qc-title">Chat Master</span>
+                                    <span class="qc-reward-badge">+100 ⭐</span>
+                                </div>
+                                <div class="qc-bar-wrap">
+                                    <div class="qc-bar" style="width: 65%; background: #ffd700;"></div>
+                                </div>
+                                <div class="qc-meta">325 / 500 сообщений</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="showcase-section mining-mode centered">
+        <div class="container-center" data-aos="fade-up">
+            <div class="center-text">
+                <div class="tag-label text-blue">SMART MINING</div>
+                <h2>Экономика Общения</h2>
+                <p class="lead max-w-700">
+                    Система вознаграждает за живое общение, а не спам.
+                    Алгоритм учитывает длину сообщений, кулдауны и активность в войсе.
+                    <br>
+<span style="color: #fff; font-size: 0.9em;">
+    ✨ <a href="/shop?category=ПремиумView" class="premium-link">Premium</a> дает множитель x1.1 к заработку.
+</span>
+                </p>
+            </div>
+
+            <div class="center-visual">
+                <div class="mining-dashboard">
+                    <div class="md-card large">
+                        <div class="md-header">
+                            <div class="md-icon"><i class="fas fa-comment-alt"></i></div>
+                            <div class="md-title">ТКС. ОБЩЕНИЕ</div>
+                        </div>
+                        <div class="md-stat-row">
+                            <span class="label">Статус</span>
+                            <span class="val success">ACTIVE ●</span>
+                        </div>
+                        <div class="md-stat-row">
+                            <span class="label">Ставка</span>
+                            <span class="val">Dynamic ⭐</span>
+                        </div>
+                        <div class="md-graph">
+                            <div class="wave-line"></div>
+                        </div>
+                    </div>
+
+                    <div class="md-plus">
+                        <i class="fas fa-plus"></i>
+                    </div>
+
+                    <div class="md-card large">
+                        <div class="md-header">
+                            <div class="md-icon"><i class="fas fa-microphone-lines"></i></div>
+                            <div class="md-title">ГОЛ. ОБЩЕНИЕ</div>
+                        </div>
+                        <div class="md-stat-row">
+                            <span class="label">Сессия</span>
+                            <span class="val warning">00:42:15</span>
+                        </div>
+                        <div class="md-stat-row">
+                            <span class="label">Доход</span>
+                            <span class="val">+45.2 ⭐</span>
+                        </div>
+                        <div class="md-visualizer-big">
+                            <span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+
+                    <div class="md-result-block">
+                        <div class="md-res-label">ИТОГОВЫЙ КОШЕЛЁК</div>
+                        <div class="md-res-value">2,450.50 ⭐</div>
+                        <div class="md-res-sub">Готовы к инвестициям</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section epic">
+        <div class="warp-bg">
+            <div class="stars"></div>
+            <div class="stars-2"></div>
+            <div class="grid-horizon"></div>
+        </div>
+
+        <div class="cta-content" data-aos="zoom-in">
+            <div class="cta-badge">BSS COMMUNITY #1</div>
+            <h2 class="glitch-text" data-text="Добро пожаловать домой">Добро пожаловать домой</h2>
+            <p class="lead">"Дача Зейна" — место, где общение превращается в игру, а каждое событие — настоящее приключение.</p>
+            
+            <div class="cta-buttons">
+                <a href="https://discord.gg/bandazeyna" target="_blank" class="btn-primary big glow-btn">
+                    <span class="btn-icon"><i class="fab fa-discord"></i></span>
+                    <span>Присоединится к серверу</span>
+                </a>
+            </div>
+            
+            <div class="cta-stats">
+                <div class="cs-item">
+                    <i class="fas fa-shield-alt"></i> <span>БЕЗОПАСНО</span>
+                </div>
+                <div class="cs-divider"></div>
+                <div class="cs-item">
+                    <i class="fas fa-bolt"></i> <span>БЫСТРО</span>
+                </div>
+                <div class="cs-divider"></div>
+                <div class="cs-item">
+                    <i class="fas fa-users"></i> <span>АКТИВ</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+<script nonce="<%= nonce %>">
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof AOS !== 'undefined') {
+            AOS.init({ duration: 800, once: true, offset: 80 });
+        }
+    });
+</script>
+</body>
+</html>

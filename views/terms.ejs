@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Условия использования | Дача Зейна' }) %>
+    <link rel="stylesheet" href="/css/legal.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="legal-page-container">
+        <aside class="legal-sidebar" data-aos="fade-right">
+            <div class="sidebar-title">Навигация</div>
+            <nav class="sidebar-nav">
+                <a href="#general" class="active"><i class="fas fa-flag"></i> 1. Общие положения</a>
+                <a href="#security"><i class="fas fa-user-lock"></i> 2. Учетная запись</a>
+                <a href="#economy"><i class="fas fa-coins"></i> 3. Имущество и RMT</a>
+                <a href="#conduct"><i class="fas fa-gavel"></i> 4. Кодекс поведения</a>
+                <a href="#ip"><i class="fas fa-copyright"></i> 5. Интеллектуальные права</a>
+                <a href="#liability"><i class="fas fa-file-contract"></i> 6. Ответственность</a>
+                <a href="#changes"><i class="fas fa-sync-alt"></i> 7. Изменения условий</a>
+            </nav>
+            
+            <div class="sidebar-contact">
+                <span>Остались вопросы?</span>
+                <a href="https://discord.gg/bandazeyna" target="_blank" class="btn-support">
+                    <i class="fab fa-discord"></i> Поддержка
+                </a>
+            </div>
+        </aside>
+
+        <main class="legal-content" data-aos="fade-up">
+            <div class="legal-header">
+                <div class="doc-badge">Документ</div>
+                <h1>Пользовательское <span class="text-gradient">Соглашение</span></h1>
+                <p class="last-updated">Последнее обновление: 06.04.2026</p>
+            </div>
+
+            <div class="legal-document">
+                
+                <section id="general" class="legal-section">
+                    <h2>1. Общие положения</h2>
+                    <p>Настоящие Условия использования (далее — «Условия») регулируют отношения между администрацией проекта «Дача Зейна» (далее — «Администрация», «Мы») и пользователем (далее — «Пользователь», «Вы») при использовании веб-сайта <code>dachazeyna.com</code> и Discord-бота «Организатор».</p>
+                    <div class="highlight-box success-box">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <strong>Важно:</strong> Авторизуясь на сайте через Discord или используя команды нашего бота, вы подтверждаете свое полное и безоговорочное согласие с данными Условиями.
+                        </div>
+                    </div>
+                </section>
+
+                <section id="security" class="legal-section">
+                    <h2>2. Учетная запись и Безопасность</h2>
+                    <ul class="styled-list">
+                        <li>
+                            <i class="fas fa-key"></i>
+                            <div>
+                                <strong>Авторизация (OAuth2):</strong> Доступ к сервису осуществляется через вашу учетную запись Discord. Мы не запрашиваем и не храним ваши пароли.
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <strong>Ответственность:</strong> Вы несете полную ответственность за сохранность доступа к вашему аккаунту Discord. Любые действия (например, продажа акций или удаление предметов), совершенные с вашего аккаунта, считаются совершенными вами.
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-ban"></i>
+                            <div>
+                                <strong>Блокировка:</strong> Администрация вправе ограничить доступ к сервису в случае нарушения правил сервера, обнаружения VPN/Proxy или подозрительной активности без предварительного уведомления.
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="economy" class="legal-section">
+                    <h2>3. Виртуальная валюта и Имущество</h2>
+                    <p>Сервис предоставляет доступ к виртуальным ценностям: звезды (Stars) и предметы инвентаря.</p>
+                    <ul class="styled-list">
+                        <li>
+                            <i class="fas fa-hand-holding"></i>
+                            <div>
+                                <strong>Отсутствие прав собственности:</strong> Вы не обладаете правом собственности на виртуальные ценности. Вы получаете ограниченную, отзывную, неисключительную лицензию на их использование в рамках нашего проекта.
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-handshake-slash text-danger"></i>
+                            <div>
+                                <strong class="text-danger">RMT (Real Money Trading):</strong> Строго запрещена продажа, покупка или обмен любых внутриигровых ценностей проекта на реальные деньги, криптовалюту или услуги вне проекта. Нарушение влечет перманентную блокировку (ЧС проекта).
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-balance-scale"></i>
+                            <div>
+                                <strong>Игровой баланс:</strong> Администрация оставляет за собой право корректировать экономику (изменять цены, проводить вайпы/сбросы, изымать средства, полученные багоюзом) для поддержания честной игры.
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="conduct" class="legal-section">
+                    <h2>4. Кодекс поведения</h2>
+                    <p>При использовании наших сервисов строго запрещено:</p>
+                    <ul class="styled-list">
+                        <li>
+                            <i class="fas fa-robot"></i>
+                            <div>Использовать стороннее ПО (скрипты, автокликеры, эксплойты) для автоматизации действий на сайте или в боте.</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-bug"></i>
+                            <div>Намеренно использовать программные ошибки (баги) для обогащения. О найденных уязвимостях необходимо сообщать в тикеты (за это предусмотрена награда).</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>Публиковать контент (в "Био" профиля, названии личной роли и т.д.), нарушающий международные нормы, законодательство Украины (по месту регистрации проекта) или <a href="https://discord.com/terms" target="_blank">правила Discord</a> (NSFW, шок-контент, незаконная реклама).</div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="ip" class="legal-section">
+                    <h2>5. Интеллектуальная собственность</h2>
+                    <p>Все права на исходный код сайта, бота, уникальный дизайн и игровые механики принадлежат разработчику nerkean.</p>
+                    <div class="highlight-box info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            Проект является независимым фанатским сообществом по игре <b>Bee Swarm Simulator</b>. Права на ассеты, персонажей и концепции игры принадлежат разработчику Onett и Roblox Corporation. Мы не аффилированы и не спонсируемся Roblox Corp.
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="liability" class="legal-section">
+                    <h2>6. Ограничение ответственности</h2>
+                    <p>Сервисы предоставляются на условиях «как есть» (as is). Администрация не гарантирует:</p>
+                    <div class="tags-container">
+                        <span class="tag">Uptime 100%</span>
+                        <span class="tag">Отсутствие багов</span>
+                        <span class="tag">Сохранность при форс-мажорах</span>
+                    </div>
+                    <p class="mt-3">Мы не несем ответственности за любой прямой или косвенный ущерб, моральный вред или потерю игровых данных, возникших в результате использования сервиса.</p>
+                </section>
+
+                <section id="changes" class="legal-section">
+                    <h2>7. Изменения условий</h2>
+                    <p>Администрация вправе в одностороннем порядке изменять настоящие Условия. Уведомления о критических изменениях публикуются в новостных каналах Discord-сервера. Продолжение использования сервиса после внесения изменений означает ваше согласие с новой редакцией.</p>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>">
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof AOS !== 'undefined') {
+                AOS.init({ once: true, offset: 50, duration: 800 });
+            }
+
+            const sections = document.querySelectorAll('.legal-section');
+            const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (pageYOffset >= (sectionTop - 150)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    window.scrollTo({
+                        top: targetSection.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

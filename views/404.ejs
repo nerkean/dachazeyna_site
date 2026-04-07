@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: '404 | Сектор не найден' }) %>
+    <link rel="stylesheet" href="/css/error.css">
+</head>
+<body class="theme-404">
+    <%- include('partials/navbar') %>
+
+    <div class="cyber-bg">
+        <div class="bg-grid"></div>
+        <div class="bg-glow"></div>
+        <div class="floating-particles">
+            </div>
+    </div>
+
+    <main class="error-wrapper">
+        <div class="error-card">
+            <div class="error-header">
+                <div class="glitch-wrapper">
+                    <h1 class="glitch" data-text="404">404</h1>
+                </div>
+                <div class="error-badge">СЕКТОР УЛЬЯ НЕ НАЙДЕН</div>
+            </div>
+            
+            <p class="error-desc">
+                Похоже, вы залетели в неисследованную зону.<br>
+                Управляйте <b>пчелой</b> и собирайте цифровую пыльцу, пока мы восстанавливаем координаты.
+            </p>
+            
+            <div class="arcade-monitor">
+                <div class="monitor-glass"></div>
+                <div class="game-container">
+                    <canvas id="gameCanvas" width="480" height="320"></canvas>
+                    
+                    <div class="game-overlay" id="gameOverlay">
+                        <div class="play-icon-pulse">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <button class="play-btn" onclick="startGame()">ЗАПУСТИТЬ СИМУЛЯЦИЮ</button>
+                        <div class="game-hints">
+                            <span class="pc-hint"><i class="fas fa-keyboard"></i> Стрелки ⬆️⬇️⬅️➡️</span>
+                            <span class="mobile-hint"><i class="fas fa-hand-pointer"></i> Свайпы по экрану</span>
+                        </div>
+                    </div>
+                    
+                    <div class="score-board" id="scoreBoard" style="display: none;">
+                        <i class="fas fa-hexagon"></i> <span id="scoreVal">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="error-actions">
+                <a href="/" class="btn-home pulse-btn">
+                    <i class="fas fa-home"></i> ВЕРНУТЬСЯ НА БАЗУ
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+    <script src="/js/404-game.js"></script>
+</body>
+</html>

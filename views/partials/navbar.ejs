@@ -1,0 +1,277 @@
+<nav class="navbar">
+    <a href="/" class="logo">
+    <img src="/assets/img/spring-icon.svg" alt="Лого" class="custom-logo-icon"> ДАЧА ЗЕЙНА
+</a>
+
+    <div class="mobile-menu-btn" id="mobileMenuBtn">
+        <span></span><span></span><span></span>
+    </div>
+    
+    <div class="nav-menu" id="navMenu">
+        <!-- <div class="nav-links">
+                <a href="/giveaways" class="nav-item"><i class="fas fa-gift"></i> Халява</a>
+                <a href="/wiki" class="nav-item"><i class="fas fa-book"></i> Вики</a>
+
+            <div class="nav-item-dropdown">
+                <div class="nav-item dropdown-trigger">
+                    <i class="fas fa-th-large"></i> Меню
+                    <i class="fas fa-chevron-down" style="font-size: 0.7em;"></i>
+                </div>
+                
+                <div class="nav-dropdown-menu">
+                   
+                         <a href="/messages" class="dd-link"><i class="fas fa-comments"></i> Сообщения</a>
+                        <a href="/leaderboard" class="dd-link"><i class="fas fa-trophy"></i> Топ Игроков</a>
+                </div>
+            </div>
+        </div> -->
+
+        <div class="auth">
+            <% if (typeof user !== 'undefined' && user) { %>
+                
+                <% if (typeof profile !== 'undefined' && profile && !user.id.startsWith('tg_')) { %>
+                    <div class="nav-balance-group">
+                        <div class="nav-balance stars" title="Звезды">
+                            <span class="nb-icon">⭐</span>
+                            <span class="nb-val"><%= Math.floor(profile.stars).toLocaleString() %></span>
+                        </div>
+                    </div>
+                <% } %>
+
+                <div class="nav-item-wrap" style="position: relative;">
+                    <div class="nav-notif-btn" id="notifBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notif-badge" id="notifBadge" style="display: <%= (locals.unreadCount > 0) ? 'flex' : 'none' %>">
+                            <%= (typeof unreadCount !== 'undefined' && unreadCount > 9) ? '9+' : (typeof unreadCount !== 'undefined' ? unreadCount : 0) %>
+                        </span>
+                    </div>
+
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <h4>Уведомления</h4>
+                            <button class="notif-read-all" id="markAllReadBtn">Прочитать все</button>
+                        </div>
+                        <ul class="notif-list" id="notifItems">
+                            <% if (locals.notifications && notifications.length > 0) { %>
+                                <% notifications.forEach(n => { %>
+                                    <div class="notif-item <%= n.read ? '' : 'unread' %>" 
+                                         onclick="readOne('<%= n._id %>', '<%= n.link %>', this)">
+                                        <div class="notif-icon">
+                                            <% if (n.type === 'SUCCESS') { %><i class="fas fa-check" style="color: #2ecc71"></i> 
+                                            <% } else if (n.type === 'INFO') { %><i class="fas fa-info" style="color: #3498db"></i> 
+                                            <% } else if (n.type === 'WARNING') { %><i class="fas fa-exclamation" style="color: #f1c40f"></i> 
+                                            <% } else { %><i class="fas fa-bell" style="color: #aaa"></i><% } %>
+                                        </div>
+                                        <div class="notif-content">
+                                            <span class="notif-text"><%= n.message %></span>
+                                            <span class="notif-time"><%= new Date(n.createdAt).toLocaleDateString() %></span>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="notif-empty">Пусто</div>
+                            <% } %>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="profile-dropdown-wrapper">
+                    <div class="profile-trigger" id="profileTrigger">
+    <% if (user.avatar) { %>
+        <% if (user.avatar.startsWith('http')) { %>
+            <img src="<%= user.avatar %>" alt="Ava">
+        <% } else { %>
+            <img src="/img/proxy/avatar/<%= user.id %>/<%= user.avatar %>" alt="Ava">
+        <% } %>
+    <% } else { %>
+        <img src="/assets/img/avatars/default_avatar.png" alt="Ava">
+    <% } %>
+    <span class="trigger-name"><%= user.username %></span>
+    <i class="fas fa-chevron-down trigger-arrow"></i>
+</div>
+
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="dropdown-header"><span class="role-badge">Игрок</span></div>
+                        <div class="dropdown-grid">
+                            <a href="/profile/<%= user.id %>" class="dd-item"><i class="fas fa-user-circle"></i> Профиль</a>
+                            <!-- <a href="/inventory" class="dd-item"><i class="fas fa-briefcase"></i> Инвентарь</a>
+                            <a href="/daily" class="dd-item"><i class="fas fa-calendar-check"></i> Дейли</a> -->
+                        </div>
+                        <div class="dropdown-footer">
+                            <a href="/auth/logout" class="dd-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+                        </div>
+                    </div>
+                </div>
+
+            <% } else { %>
+                <%# Упростили вход: теперь это просто кнопка Discord вместо выпадающего списка %>
+                <a href="/auth/discord" class="nav-item login-btn-simple">
+                    <i class="fab fa-discord"></i> Войти через Discord
+                </a>
+            <% } %>
+        </div>
+    </div>
+</nav>
+
+<div id="navOverlay"></div>
+
+<audio id="audioNotification" src="/assets/sounds/notify.mp3" preload="auto"></audio>
+<div id="soundToast" class="sound-toast"><i class="fas fa-volume-mute"></i><span>Нажми, чтобы включить звук</span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous" defer></script>
+
+<script nonce="<%= locals.nonce %>">
+  document.addEventListener('DOMContentLoaded', () => {
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.getElementById('navMenu');
+    const overlay = document.getElementById('navOverlay');
+    const navbar = document.querySelector('.navbar');
+    
+    const loginTrigger = document.getElementById('loginTrigger');
+    const loginDropdown = document.getElementById('loginDropdown');
+    const profileTrigger = document.getElementById('profileTrigger');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const notifBtn = document.getElementById('notifBtn');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const notifBadge = document.getElementById('notifBadge');
+    const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+    const closeAll = () => {
+        if (navMenu) navMenu.classList.remove('active');
+        if (mobileBtn) mobileBtn.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+        if (loginDropdown) loginDropdown.classList.remove('active');
+        if (profileDropdown) profileDropdown.classList.remove('active');
+        if (notifDropdown) notifDropdown.classList.remove('active');
+    };
+
+    window.readOne = async (id, link, element) => {
+        let currentCount = parseInt(notifBadge?.innerText) || 0;
+        if (currentCount > 0) updateBadge(currentCount - 1);
+
+        if (element) {
+            element.style.opacity = '0';
+            element.style.transform = 'translateX(20px)';
+            setTimeout(() => element.remove(), 300);
+        }
+
+        try {
+            await fetch('/api/notifications/read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+        } catch (e) { console.error('Ошибка чтения:', e); }
+
+        if (link && link !== '#' && link !== 'undefined') {
+            window.location.href = link;
+        }
+    };
+
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            updateBadge(0);
+            const items = document.getElementById('notifItems');
+            if (items) items.innerHTML = '<div class="notif-empty">Пусто</div>';
+            
+            try {
+                await fetch('/api/notifications/read', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}) 
+                });
+            } catch (e) { console.error(e); }
+        });
+    }
+
+    const updateBadge = (count) => {
+        if (!notifBadge) return;
+        notifBadge.style.display = count > 0 ? 'flex' : 'none';
+        notifBadge.innerText = count > 9 ? '9+' : count;
+    };
+
+    if (mobileBtn) {
+        mobileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navMenu.classList.toggle('active');
+            mobileBtn.classList.toggle('open');
+            overlay.classList.toggle('active');
+        });
+    }
+
+    const toggleMenu = (trigger, menu) => {
+        if (!trigger || !menu) return;
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isActive = menu.classList.contains('active');
+            if (window.innerWidth > 992) {
+                if (loginDropdown && loginDropdown !== menu) loginDropdown.classList.remove('active');
+                if (profileDropdown && profileDropdown !== menu) profileDropdown.classList.remove('active');
+                if (notifDropdown && notifDropdown !== menu) notifDropdown.classList.remove('active');
+            }
+            menu.classList.toggle('active', !isActive);
+        });
+    };
+
+    toggleMenu(loginTrigger, loginDropdown);
+    toggleMenu(profileTrigger, profileDropdown);
+    toggleMenu(notifBtn, notifDropdown);
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!navMenu.contains(e.target) && !mobileBtn?.contains(e.target)) closeAll();
+    });
+    if (overlay) overlay.addEventListener('click', closeAll);
+
+    window.mainSocket = null; 
+    
+    function connectSocket() {
+        if (typeof io === 'undefined' || window.mainSocket) return; 
+
+        window.mainSocket = io({ transports: ['websocket'], reconnection: true });
+
+        window.mainSocket.on('connect', () => {
+            const nonce = "<%= locals.nonce %>";
+            if (nonce) window.mainSocket.emit('join_room', nonce);
+            <% if (typeof user !== 'undefined' && user) { %>
+                window.mainSocket.emit('join_room', '<%= user.id %>');
+            <% } %>
+        });
+
+        window.mainSocket.on('tg_auth_success', (data) => {
+            window.location.href = `/auth/finalize?tgId=${data.tgId}`;
+        });
+
+        <% if (typeof user !== 'undefined' && user) { %>
+            window.mainSocket.on('new_notification', (notif) => {
+                const currentCount = parseInt(notifBadge?.innerText) || 0;
+                updateBadge(currentCount + 1);
+                
+                const items = document.getElementById('notifItems');
+                if (items) {
+                    const empty = items.querySelector('.notif-empty');
+                    if (empty) empty.remove();
+                    
+                    const html = `
+                        <div class="notif-item unread" onclick="readOne('${notif._id}', '${notif.link || '#'}', this)">
+                            <div class="notif-icon"><i class="fas fa-info-circle" style="color: #3498db"></i></div>
+                            <div class="notif-content">
+                                <span class="notif-text">${notif.message}</span>
+                                <span class="notif-time">только что</span>
+                            </div>
+                        </div>`;
+                    items.insertAdjacentHTML('afterbegin', html);
+                }
+                if (typeof window.showToast === 'function') window.showToast('Уведомление', notif.message, 'info');
+            });
+        <% } %>
+    }
+
+    if (typeof io !== 'undefined') connectSocket();
+});
+</script>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Апелляции (Admin)' }) %>
+    <style>
+        :root {
+            --bg-dark: #050608;
+            --card-bg: rgba(20, 22, 28, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --danger: #ff0055;
+            --danger-dim: rgba(255, 0, 85, 0.1);
+            --success: #2ecc71;
+            --success-dim: rgba(46, 204, 113, 0.1);
+            --accent: #FFD700;
+            --accent-dim: rgba(255, 215, 0, 0.05);
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .admin-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none;
+            background: radial-gradient(circle at top center, rgba(88, 101, 242, 0.05) 0%, transparent 70%);
+        }
+
+        .admin-container {
+            position: relative; z-index: 10;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 120px 20px 80px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 50px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .page-title i { color: #5865F2; }
+
+        .badge-count {
+            background: var(--danger);
+            color: white;
+            font-size: 1rem;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-weight: 800;
+            box-shadow: 0 0 15px var(--danger-dim);
+            animation: pulseBadge 2s infinite;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 100px 20px;
+            background: var(--card-bg);
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+        }
+        .empty-state i {
+            font-size: 5rem;
+            color: var(--success);
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px var(--success-dim));
+        }
+        .empty-state h2 { font-size: 1.8rem; margin-bottom: 10px; }
+        .empty-state p { color: var(--text-muted); font-size: 1.1rem; }
+
+        .appeal-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .appeal-card:hover {
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+        }
+
+        .appeal-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background: #5865F2;
+        }
+
+        .ac-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .ac-avatar-placeholder {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #5865F2, #404EED);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 1.6rem; color: #fff;
+            box-shadow: 0 5px 15px rgba(88, 101, 242, 0.3);
+        }
+
+        .ac-user-info { flex: 1; }
+        .ac-user-info h3 { margin: 0 0 5px 0; font-size: 1.3rem; font-weight: 800; color: #fff; }
+        .ac-user-id {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 8px;
+            font-size: 0.85rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;
+            cursor: pointer; transition: 0.2s; border: 1px solid transparent;
+        }
+        .ac-user-id:hover { color: #fff; border-color: rgba(255,255,255,0.2); background: rgba(0,0,0,0.6); }
+
+        .ac-date {
+            text-align: right; color: #6b7280; font-size: 0.9rem; font-weight: 600;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .ac-date span { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+
+        .ac-body { display: flex; flex-direction: column; gap: 20px; }
+
+        .info-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .info-label {
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+            font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+        }
+        .info-text { color: #e5e7eb; line-height: 1.6; font-size: 0.95rem; white-space: pre-wrap; }
+
+        .box-official { border-left: 3px solid var(--danger); background: var(--danger-dim); }
+        .box-official .info-label { color: var(--danger); }
+        .box-official .info-text { font-family: 'JetBrains Mono', monospace; }
+
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .box-user .info-label { color: var(--text-muted); }
+        .box-plea { border: 1px solid rgba(255, 215, 0, 0.1); background: var(--accent-dim); }
+        .box-plea .info-label { color: var(--accent); }
+
+        .ac-actions {
+            display: flex; gap: 15px; margin-top: 25px; padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-action {
+            flex: 1; padding: 14px; border: none; border-radius: 14px;
+            font-weight: 800; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .btn-approve { background: rgba(46, 204, 113, 0.1); color: var(--success); border: 1px solid var(--success-dim); }
+        .btn-approve:hover { background: var(--success); color: #000; box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3); transform: translateY(-2px); }
+
+        .btn-reject { background: rgba(255, 0, 85, 0.1); color: var(--danger); border: 1px solid var(--danger-dim); }
+        .btn-reject:hover { background: var(--danger); color: #fff; box-shadow: 0 10px 20px rgba(255, 0, 85, 0.3); transform: translateY(-2px); }
+
+        @keyframes pulseBadge { 0%, 100% { box-shadow: 0 0 0 0 var(--danger-dim); } 50% { box-shadow: 0 0 0 10px rgba(255,0,85,0); } }
+
+        @media (max-width: 768px) {
+            .grid-2col { grid-template-columns: 1fr; }
+            .ac-header { flex-wrap: wrap; }
+            .ac-date { text-align: left; width: 100%; flex-direction: row; align-items: center; margin-top: 10px; }
+            .ac-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    
+    <div class="admin-bg"></div>
+
+    <div class="admin-container">
+        
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-shield-alt"></i> Заявки на разбан
+            </h1>
+            <% if (appeals.length > 0) { %>
+                <div class="badge-count"><%= appeals.length %> Новых</div>
+            <% } %>
+        </div>
+        
+        <% if (appeals.length === 0) { %>
+            <div class="empty-state" data-aos="zoom-in">
+                <i class="fas fa-check-circle"></i>
+                <h2>Очередь пуста!</h2>
+                <p>Все апелляции рассмотрены</p>
+            </div>
+        <% } %>
+
+        <% appeals.forEach(appeal => { 
+            let userReason = "Не указано (Старый формат)";
+            let userAppeal = appeal.appealText;
+
+            if (appeal.appealText.includes('[Причина бана со слов игрока]:')) {
+                const parts = appeal.appealText.split('\n\n[Оправдание]:');
+                userReason = parts[0].replace('[Причина бана со слов игрока]:', '').trim();
+                userAppeal = parts[1] ? parts[1].trim() : "";
+            }
+        %>
+            <div class="appeal-card" id="app-<%= appeal._id %>" data-aos="fade-up">
+                
+                <div class="ac-header">
+                    <div class="ac-avatar-placeholder">
+                        <%= appeal.username.charAt(0).toUpperCase() %>
+                    </div>
+                    
+                    <div class="ac-user-info">
+                        <h3><%= appeal.username %></h3>
+                        <div class="ac-user-id" onclick="copyId('<%= appeal.userId %>')" title="Нажмите, чтобы скопировать">
+                            <i class="fas fa-fingerprint"></i> <%= appeal.userId %> <i class="far fa-copy" style="margin-left:5px;"></i>
+                        </div>
+                    </div>
+
+                    <div class="ac-date">
+                        <span>Дата подачи</span>
+                        <div><i class="far fa-clock"></i> <%= new Date(appeal.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></div>
+                    </div>
+                </div>
+
+                <div class="ac-body">
+                    <div class="info-box box-official">
+                        <div class="info-label"><i class="fas fa-gavel"></i> Лог Бана (Выдан модератором)</div>
+                        <div class="info-text"><%= appeal.banReason || 'Причина не указана в профиле' %></div>
+                    </div>
+
+                    <div class="grid-2col">
+                        <div class="info-box box-user">
+                            <div class="info-label"><i class="fas fa-comment-dots"></i> Со слов пользователя</div>
+                            <div class="info-text"><%= userReason %></div>
+                        </div>
+                        <div class="info-box box-plea">
+                            <div class="info-label"><i class="fas fa-hand-holding-heart"></i> Текст апелляции</div>
+                            <div class="info-text"><%= userAppeal %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ac-actions">
+                    <button class="btn-action btn-approve" onclick="decide('<%= appeal._id %>', 'approve')">
+                        <i class="fas fa-user-check"></i> Одобрить и Разбанить
+                    </button>
+                    <button class="btn-action btn-reject" onclick="decide('<%= appeal._id %>', 'reject')">
+                        <i class="fas fa-times-circle"></i> Отклонить заявку
+                    </button>
+                </div>
+
+            </div>
+        <% }) %>
+    </div>
+
+    <script nonce="<%= nonce %>">
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof AOS !== 'undefined') AOS.init({ once: true, duration: 600 });
+        });
+
+        function copyId(id) {
+            navigator.clipboard.writeText(id);
+            alert('ID ' + id + ' скопирован в буфер обмена!');
+        }
+
+        async function decide(id, action) {
+            const card = document.getElementById('app-' + id);
+            
+            const isApprove = action === 'approve';
+            const confirmMsg = isApprove 
+                ? 'Вы уверены, что хотите СНЯТЬ БЛОКИРОВКУ с этого пользователя?' 
+                : 'ОТКЛОНИТЬ заявку? Бан останется в силе.';
+            
+            if (!confirm(confirmMsg)) return;
+
+            card.style.opacity = '0.5';
+            card.style.pointerEvents = 'none';
+
+            try {
+                const res = await fetch('/api/admin/appeal/decide', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ appealId: id, action })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    card.style.transform = isApprove ? 'translateX(-100px)' : 'translateX(100px)';
+                    card.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        card.remove();
+                        const badge = document.querySelector('.badge-count');
+                        if (badge) {
+                            const count = parseInt(badge.innerText) - 1;
+                            if (count <= 0) location.reload();
+                            else badge.innerText = count + ' Новых';
+                        }
+                    }, 400);
+                } else {
+                    alert('Ошибка: ' + data.error);
+                    card.style.opacity = '1';
+                    card.style.pointerEvents = 'auto';
+                }
+            } catch (e) { 
+                alert('Ошибка сети');
+                card.style.opacity = '1';
+                card.style.pointerEvents = 'auto';
+            }
+        }
+    </script>
+</body>
+</html>

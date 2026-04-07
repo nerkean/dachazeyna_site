@@ -1,0 +1,437 @@
+<% 
+    let noIndex = false;
+    if (profile.isBanned || (profile.totalMessages < 5000 && profile.stars < 1000)) {
+        noIndex = true;
+    }
+
+    let headerBgUrl = '/assets/backgrounds/profile_template.png'; 
+    let bannerStyle = ''; 
+    let headerClass = 'profile-header';
+
+    if (profile.activeBackground) {
+        const bgDef = getItemDefinition(profile.activeBackground);
+        if (bgDef.type === 'background') {
+            const cleanBgId = profile.activeBackground.replace('bg_', '');
+            headerBgUrl = `/assets/thumbnails/backgrounds/${cleanBgId}.webp`; 
+            bannerStyle = `background-image: url('${headerBgUrl}');`;
+        }
+    } else if (profile.profileBannerURL) {
+        headerBgUrl = profile.profileBannerURL;
+        bannerStyle = `background-image: url('${headerBgUrl}');`;
+    } else {
+        headerClass += ' default-bg';
+    }
+
+    let frameUrl = null;
+    if (profile.activeFrame) {
+        const frameDef = getItemDefinition(profile.activeFrame);
+        if (frameDef.type === 'frame') {
+            const cleanFrameId = profile.activeFrame.replace('frame_', '');
+            frameUrl = `/assets/thumbnails/frames/${cleanFrameId}.webp`;
+        }
+    }
+%>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { 
+        title: 'Профиль | ' + targetUser.username,
+        description: `Профиль игрока ${targetUser.username}. Статистика и инвентарь на сервере Дача Зейна.`,
+        image: targetUser.avatar ? `https://dachazeyna.com/img/proxy/avatar/${targetUser.id}/${targetUser.avatar}` : 'https://dachazeyna.com/assets/img/og-image.png',
+        noIndex: noIndex 
+    }) %>
+    
+    <link rel="preload" href="/css/profile.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/css/profile.css"></noscript>
+    <link rel="stylesheet" href="/css/modals.css" media="print" onload="this.media='all'">
+    <link rel="preload" as="image" href="<%= headerBgUrl %>" fetchpriority="high">
+    
+    <style>
+        .banned-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(231, 76, 60, 0.15); color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.4);
+            padding: 6px 14px; border-radius: 8px;
+            font-size: 0.85rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-left: 15px; vertical-align: middle;
+        }
+
+        .banned-container {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #180a0a 0%, #0a0202 100%);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 20px; padding: 80px 20px;
+            text-align: center; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; min-height: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 100px rgba(231, 76, 60, 0.05);
+        }
+
+        .banned-icon { font-size: 5rem; color: #e74c3c; margin-bottom: 25px; animation: pulse-red 2s infinite; }
+        .banned-title { font-size: 2.2rem; font-weight: 900; color: #fff; margin-bottom: 15px; text-transform: uppercase; }
+        .banned-desc { color: #bbb; font-size: 1.1rem; max-width: 500px; line-height: 1.6; margin-bottom: 30px; }
+        .ban-reason-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px 25px; border-radius: 12px; color: #ff6b6b; font-size: 0.95rem; display: inline-block; }
+
+        @keyframes pulse-red {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <main class="profile-wrapper">
+        
+        <header class="<%= headerClass %>" style="<%= bannerStyle %>" role="banner">
+            <div class="profile-header-overlay">
+              <div class="avatar-wrapper">
+                    <% if (frameUrl) { %>
+                        <img src="<%= frameUrl %>" class="avatar-frame" alt="Рамка">
+                    <% } %>
+                    <img src="<%= targetUser.avatar ? `/img/proxy/avatar/${targetUser.id}/${targetUser.avatar}` : '/assets/img/avatars/default_avatar.png' %>" 
+                         class="avatar-big" 
+                         alt="Аватар <%= targetUser.username %>"
+                         fetchpriority="high">
+                </div>
+                
+                <div class="profile-identity">
+                    <h1>
+                        <%= targetUser.username %>
+                        <% if (profile.isBanned) { %>
+                            <span class="banned-badge"><i class="fas fa-ban"></i> Заблокирован</span>
+                        <% } %>
+                    </h1>
+
+                    <% if (profile.activeTitle) { %>
+                        <span class="user-title"><%= profile.activeTitle %></span>
+                    <% } %>
+                    
+                    <div class="badges">
+                        <% if (profile.premiumType) { %>
+                            <a href="/shop" class="badge premium"><i class="fas fa-gem"></i> Premium</a>
+                        <% } %>
+                        <% if (profile.isTaxDelinquent) { %>
+                            <span class="badge tax-warning"><i class="fas fa-exclamation-triangle"></i> Должник</span>
+                        <% } %>
+                        <% if (!profile.isBanned) { %>
+                            <span class="badge rep">
+                                <i class="fas fa-thumbs-up"></i> Репутация: <%= profile.reputation %>
+                            </span>
+                        <% } %>
+                    </div>
+                </div>
+
+                <% if (isOwner && !profile.isBanned) { %>
+                    <button class="btn-edit" onclick="openEditModal()" aria-label="Настроить титул">
+                        <i class="fas fa-pen"></i> Настроить титул
+                    </button>
+                <% } else if (!isOwner && !profile.isBanned) { %>
+                    <a href="/messages/<%= targetUser.id %>" class="btn-edit" style="background: var(--primary); border-color: var(--primary);" aria-label="Написать сообщение">
+                        <i class="fas fa-envelope"></i> Написать
+                    </a>
+                <% } %>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <% if (profile.isBanned) { %>
+                <div class="banned-container">
+                    <i class="fas fa-user-slash banned-icon"></i>
+                    <div class="banned-title">Профиль скрыт</div>
+                    <div class="banned-desc">Доступ к этому профилю ограничен администрацией сообщества "Дача Зейна".</div>
+                    <% if (profile.banReason) { %>
+                        <div class="ban-reason-box"><i class="fas fa-info-circle"></i> Причина: <%= profile.banReason %></div>
+                    <% } %>
+                </div>
+            <% } else { %>
+            
+                <div class="col-left">
+                    <div class="card glow-card">
+                        <h2><i class="fas fa-coins"></i> Финансы</h2>
+                        <div class="stat-row"><span>Баланс:</span><span class="val gold"><%= Math.floor(profile.stars).toLocaleString() %> ⭐</span></div>
+                    </div>
+
+                    <div class="card">
+                        <h2><i class="fas fa-chart-bar"></i> Активность</h2>
+                        <div class="stat-row"><span>Сообщений:</span><span class="val"><%= profile.totalMessages || 0 %></span></div>
+                        
+                        <% 
+                            let totalMinsFromHistory = 0;
+                            if (profile.dailyActivityHistory) {
+                                profile.dailyActivityHistory.forEach(h => {
+                                    totalMinsFromHistory += (h.voiceMinutes || 0);
+                                    if (h.voiceSeconds) totalMinsFromHistory += Math.floor(h.voiceSeconds / 60);
+                                });
+                            }
+
+                            let globalMins = profile.totalVoiceMinutes || 0;
+                            let finalVoiceMins = Math.max(globalMins, totalMinsFromHistory);
+
+                            let voiceDisplay = '0 мин.';
+                            if (finalVoiceMins > 0 && finalVoiceMins < 60) {
+                                voiceDisplay = finalVoiceMins + ' мин.';
+                            } else if (finalVoiceMins >= 60) {
+                                voiceDisplay = (finalVoiceMins / 60).toFixed(1) + ' ч.';
+                            }
+                        %>
+                        <div class="stat-row"><span>Голос:</span><span class="val"><%= voiceDisplay %></span></div>
+                        <div class="stat-row"><span>Вступил:</span><span class="val small"><%= new Date(profile.joinedAt).toLocaleDateString('ru-RU') %></span></div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2><i class="fas fa-heart"></i> Семья</h2>
+                        <% if (locals.isMarried) { %>
+                            <div class="marriage-info">
+                                <div class="heart-icon"><i class="fas fa-heart"></i></div>
+                                <div>
+                                    <p>В браке с <strong><%= partnerName || 'Любимым человеком' %></strong></p>
+                                    <p class="small-date">с <%= marriageDate ? new Date(marriageDate).toLocaleDateString('ru-RU') : 'давних пор' %></p>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted">Холост / Не замужем</p>
+                        <% } %>
+                    </div>
+
+                    <% if (isOwner) { %>
+                        <div class="card danger-zone">
+                            <h2><i class="fas fa-user-secret"></i> Личное дело</h2>
+                            <p>Предупреждений: <strong><%= profile.warningsReceived || 0 %></strong></p>
+                            <p>Мьютов получено: <strong><%= profile.mutesIssued || 0 %></strong></p>
+                            <% if (profile.taxDue > 0) { %>
+                                 <p class="tax-alert">Налоговый долг: <%= profile.taxDue %> ⭐</p>
+                            <% } %>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="col-center">
+                    <div class="card graph-card" style="height: 100%;">
+                        <h2>Активность (7 дней)</h2>
+                        <div class="chart-container" style="height: calc(100% - 40px);">
+                            <div id="activityChart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-right">
+                    <div class="card" style="height: 100%;">
+                        <h2><i class="fas fa-box-open"></i> Инвентарь</h2>
+                        <div class="inventory-grid">
+                            <% 
+                                const topItems = profile.inventory.slice(0, 12);
+                                if (topItems.length > 0) {
+                                    topItems.forEach(item => { 
+                                        const def = getItemDefinition(item.itemId);
+                                        let imgUrl = null;
+                                        if (def.type === 'background' || def.type === 'frame') {
+                                            const folder = def.type === 'background' ? 'backgrounds' : 'frames';
+                                            const cleanId = item.itemId.replace('bg_', '').replace('frame_', '');
+                                            imgUrl = `/assets/thumbnails/${folder}/${cleanId}.webp`;
+                                        }
+                            %>
+                                <div class="inv-item <%= def.rarity %>" 
+                                     style="cursor: pointer;"
+                                     onclick="showItemDetails('<%= def.name %>', '<%= def.description %>', '<%= imgUrl || '' %>', '<%= def.rarity.toUpperCase() %>', '<%- escape(def.displayIcon).replace(/'/g, "\\'") %>')"
+                                     title="<%= def.name %>">
+                                    <div class="inv-icon">
+                                        <% if (imgUrl) { %>
+                                            <img src="<%= imgUrl %>" loading="lazy" width="48" height="48" alt="Предмет" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                                            <div class="inv-emoji" style="display:none"><%- def.displayIcon %></div>
+                                        <% } else { %>
+                                            <div class="inv-emoji"><%- def.displayIcon %></div>
+                                        <% } %>
+                                    </div>
+                                    <span class="inv-qty">x<%= item.amount %></span>
+                                </div>
+                            <%  });
+                                } else { %>
+                                    <p class="text-muted" style="grid-column: 1/-1; text-align: center; padding: 20px;">Инвентарь пуст</p>
+                            <% } %>
+                        </div>
+                        <% if (isOwner && profile.inventory.length > 12) { %>
+                            <a href="/inventory" class="btn-secondary" style="justify-content: center; margin-top: 15px;">Открыть весь инвентарь</a>
+                        <% } %>
+                    </div>
+                </div>
+
+            <% } %> 
+        </div> 
+    </main>
+
+    <% if (isOwner && !profile.isBanned) { %>
+    <div class="modal-overlay" id="editModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-box">
+            <div class="modal-icon"><i class="fas fa-id-badge"></i></div>
+            <h2 class="modal-title" id="modalTitle">Настройка Титула</h2>
+            
+            <div style="margin-bottom: 20px; text-align: center;">
+                <% if (profile.inventory.some(i => i.itemId === 'title_token')) { %>
+                    <div style="color: #2ecc71; margin-bottom: 5px;">
+                        <i class="fas fa-check-circle"></i> <b>Жетон в наличии</b>
+                    </div>
+                <% } else { %>
+                    <div style="color: #ef4444; margin-bottom: 5px;">
+                        <i class="fas fa-times-circle"></i> <b>Нет Жетона</b>
+                    </div>
+                    <small style="color: #aaa;">Купите "Жетон Титула" в <a href="/shop" style="color: var(--primary);">Магазине</a></small>
+                <% } %>
+            </div>
+
+            <input type="text" id="editTitle" class="modal-input" 
+                   placeholder="Введите новый титул (макс. 30)" maxlength="30" 
+                   value="<%= profile.activeTitle || '' %>">
+            
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" onclick="closeEditModal()">Отмена</button>
+                <button class="btn-modal btn-secondary" onclick="clearTitle()">Сбросить</button>
+                <button class="btn-modal btn-confirm" onclick="saveTitle()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+    <% } %>
+
+    <%- include('partials/footer') %>
+    
+    <% if (!profile.isBanned) { %>
+        <script src="/libs/apexcharts.js" defer></script>
+    
+    <script nonce="<%= nonce %>">
+        const historyData = <%- JSON.stringify(profile.dailyActivityHistory || []) %>;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.requestIdleCallback) {
+                window.requestIdleCallback(() => { waitForApex(); });
+            } else {
+                setTimeout(waitForApex, 1500); 
+            }
+        });
+
+        function waitForApex() {
+            const check = setInterval(() => {
+                if (typeof ApexCharts !== 'undefined') {
+                    clearInterval(check);
+                    initChart();
+                }
+            }, 100);
+        }
+
+        function initChart() {
+            const chartEl = document.querySelector("#activityChart");
+            if (!chartEl) return;
+            
+            const days = [], msgData = [], voiceData = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                days.push(d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }));
+                
+                const found = historyData.find(h => {
+                    const hDate = new Date(h.date);
+                    return hDate.getDate() === d.getDate() && hDate.getMonth() === d.getMonth();
+                });
+                
+                msgData.push(found ? (found.messages || 0) : 0);
+                
+                let vMins = 0;
+                if (found) {
+                    if (found.voiceMinutes !== undefined) vMins = found.voiceMinutes;
+                    else if (found.voiceSeconds !== undefined) vMins = Math.floor(found.voiceSeconds / 60);
+                }
+                voiceData.push(vMins);
+            }
+
+            const options = {
+                series: [{ name: 'Сообщения', data: msgData }, { name: 'Войс (мин)', data: voiceData }],
+                chart: { type: 'area', height: '100%', background: 'transparent', toolbar: { show: false }, fontFamily: 'Montserrat' },
+                colors: ['#5865F2', '#ffd700'],
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 2 },
+                fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0.05 } },
+                theme: { mode: 'dark' },
+                xaxis: { categories: days, labels: { style: { colors: '#888' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+                yaxis: { show: false },
+                grid: { show: false, padding: { left: 0, right: 0 } }, 
+                legend: { show: false }
+            };
+            
+            new ApexCharts(chartEl, options).render();
+        }
+        
+        function showItemDetails(name, description, image, rarity, emojiText) {
+            const rarityColors = {
+                'COMMON': '#bdc3c7', 'UNCOMMON': '#2ecc71', 'RARE': '#3498db', 
+                'EPIC': '#9b59b6', 'LEGENDARY': '#f1c40f', 'MYTHIC': '#e74c3c'
+            };
+            const color = rarityColors[rarity] || '#fff';
+
+            const txt = document.createElement("textarea");
+            txt.innerHTML = emojiText;
+            const decodedEmoji = txt.value;
+
+            let visualContent = image 
+                ? `<img src="${image}" style="width: 80%; height: 80%; object-fit: contain;" alt="Иконка">` 
+                : `<div style="font-size: 3.5rem;">${decodedEmoji}</div>`;
+
+            const content = `
+                <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 10px 0;">
+                    <div style="width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid ${color}; box-shadow: 0 0 25px ${color}30;">${visualContent}</div>
+                    <div style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: ${color}; background: ${color}15; padding: 6px 16px; border-radius: 50px; border: 1px solid ${color}30;">${rarity || 'ITEM'}</div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; width: 100%; border: 1px solid rgba(255,255,255,0.05);">
+                        <p style="color: #ccc; margin: 0; font-size: 0.95rem; line-height: 1.6;">${description || 'Описание отсутствует.'}</p>
+                    </div>
+                </div>
+            `;
+
+            if (window.Modal) {
+                Modal.show(name, content, 'info', [{ text: 'Закрыть', handler: 'close' }]);
+            } else {
+                alert(`${name}\n\n${description}`);
+            }
+        }
+
+        function openEditModal() { const modal = document.getElementById('editModal'); if (modal) modal.classList.add('active'); }
+        function closeEditModal() { const modal = document.getElementById('editModal'); if (modal) modal.classList.remove('active'); }
+
+        async function saveTitle() {
+            const title = document.getElementById('editTitle').value;
+            if(!title.trim()) return alert("Введите текст титула!");
+            if (typeof Modal !== 'undefined') {
+                const ok = await Modal.confirm("Подтверждение", "Сменить титул? Это стоит 1 Жетон.");
+                if(!ok) return;
+            }
+            sendUpdate(title);
+        }
+
+        async function clearTitle() {
+            if (typeof Modal !== 'undefined') {
+                const ok = await Modal.confirm("Сброс", "Убрать титул?");
+                if(!ok) return;
+            }
+            sendUpdate("");
+        }
+
+        async function sendUpdate(title) {
+            try {
+                const res = await fetch('/api/user/update', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ activeTitle: title })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (typeof Modal !== 'undefined') await Modal.alert("Успешно", "Титул обновлен", "success");
+                    else alert("Успешно");
+                    location.reload();
+                } else {
+                    if (typeof Modal !== 'undefined') Modal.alert("Ошибка", data.error, "error");
+                    else alert(data.error);
+                }
+            } catch (e) { alert("Ошибка сети"); }
+        }
+    </script>
+    <% } %>
+</body>
+</html>

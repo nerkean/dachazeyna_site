@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Розыгрыши | Халява' }) %>
+    <link rel="preload" href="/css/giveaways.css" as="style">
+    <link rel="stylesheet" href="/css/giveaways.css">
+    
+    <%
+        function parseDiscordMarkdown(text) {
+            if (!text) return '';
+            let html = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+            html = html.replace(/__(.*?)__/g, '<u>$1</u>');
+            html = html.replace(/~~(.*?)~~/g, '<s>$1</s>');
+            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+            html = html.replace(/&lt;@!?(\d+)&gt;/g, (match, id) => {
+                if (id === '1193621998505566350') return '<span class="d-mention" title="Организатор">@Организатор</span>';
+                return '<span class="d-mention">@Пользователь</span>';
+            });
+            html = html.replace(/&lt;@&(\d+)&gt;/g, '<span class="d-mention">@Роль</span>');
+            html = html.replace(/\n/g, '<br>');
+
+            return html;
+        }
+    %>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="gw-wrapper">
+        
+        <div class="gw-header">
+            <h1>🎉 Активные <span>Розыгрыши</span></h1>
+            <p>Участвуй и выигрывай редкие предметы, валюту и привилегии.</p>
+        </div>
+
+        <div class="gw-grid">
+            <% if (active && active.length > 0) { %>
+                <% active.forEach(g => { %>
+                    <% const isOfficial = g.giveawayType && g.giveawayType !== 'general'; %>
+
+                    <div class="gw-card <%= isOfficial ? 'official' : '' %>">
+                        <div class="gw-cover <%= isOfficial ? 'official-bg' : '' %>">
+                            <div class="gw-icon"><%= isOfficial ? '⭐' : '🎁' %></div>
+                            
+                            <% if (isOfficial) { %>
+                                <div class="gw-official-tag"><i class="fas fa-check-circle"></i> Бот</div>
+                            <% } %>
+
+                            <% if (g.entryCost > 0) { %>
+                                <div class="gw-badge">Вход: <%= g.entryCost %> <%= g.currency === 'stars' ? '⭐' : '✨' %></div>
+                            <% } else { %>
+                                <div class="gw-badge" style="color: #2ecc71; border-color: rgba(46, 204, 113, 0.3);">БЕСПЛАТНО</div>
+                            <% } %>
+                        </div>
+                        <div class="gw-content">
+                            <div class="gw-title"><%= g.title %></div>
+                            <div class="gw-desc"><%- parseDiscordMarkdown(g.description) %></div>
+                            
+                            <div class="gw-prize-box">
+                                <div class="prize-icon"><i class="fas fa-gift"></i></div>
+                                <div class="prize-info">
+                                    <span class="prize-label">Награда</span>
+                                    <span class="prize-val"><%= g.rewardsText %></span>
+                                </div>
+                            </div>
+
+                            <div class="gw-meta">
+                                <div class="meta-item">
+                                    <span class="meta-lbl">Победителей</span>
+                                    <span class="meta-val"><%= g.winnerCount %></span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-lbl">Участников</span>
+                                    <span class="meta-val" id="count-<%= g._id %>"><%= g.participants.length %></span>
+                                </div>
+                            </div>
+
+                            <div class="gw-timer" data-end="<%= new Date(g.endsAt).getTime() %>">
+                                <i class="fas fa-clock"></i> <span>Загрузка...</span>
+                            </div>
+
+                            <% if (g.isJoined) { %>
+                                <button class="btn-join joined" disabled><i class="fas fa-check"></i> Вы участвуете</button>
+                            <% } else { %>
+                                <button class="btn-join active <%= isOfficial ? 'official-btn' : '' %>" onclick="joinGiveaway('<%= g._id %>', this)">
+                                    Участвовать
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-ghost" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                    <h3>Активных розыгрышей нет</h3>
+                    <p>Загляни позже или следи за анонсами в Discord!</p>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="history-section">
+            <div class="hs-header" data-aos="fade-up">
+                <h2 class="hs-title">Архив Розыгрышей</h2>
+                <p class="hs-subtitle">История побед и легендарных раздач</p>
+            </div>
+
+            <div class="ended-grid">
+                <% if (ended && ended.length > 0) { %>
+                    <% ended.forEach((g, index) => { %>
+                        
+                        <% 
+                            const isOfficialEnded = g.giveawayType && g.giveawayType !== 'general';
+                            const dateStr = new Date(g.endsAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+                        %>
+
+                        <div class="h-card <%= isOfficialEnded ? 'official' : '' %>" 
+                             onclick="openHistoryModal(<%= index %>)"
+                             data-aos="fade-up" 
+                             data-aos-delay="<%= index * 50 %>">
+                            
+                            <div class="h-status">Завершено</div>
+                            
+                            <div class="h-date">
+                                <i class="far fa-calendar"></i> <%= dateStr %>
+                            </div>
+                            
+                            <h3 class="h-title"><%= g.title %></h3>
+                            
+                            <div class="h-footer">
+                                <div class="h-winner-icon">
+                                    <i class="<%= isOfficialEnded ? 'fas fa-star' : 'fas fa-trophy' %>"></i>
+                                </div>
+                                <div class="h-winner-info">
+                                    <span class="h-winner-lbl">Победитель</span>
+                                    <span class="h-winner-name">
+                                        <% if (g.winnerNames && g.winnerNames.length > 0) { %>
+                                            <% if (g.winnerNames.length === 1) { %>
+                                                <%= g.winnerNames[0] %>
+                                            <% } else { %>
+                                                <%= g.winnerNames[0] %> (+<%= g.winnerNames.length - 1 %>)
+                                            <% } %>
+                                        <% } else { %>
+                                            <span style="color: #666;">Не определен</span>
+                                        <% } %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    <% }) %>
+                <% } else { %>
+                    <div class="history-empty">История розыгрышей пока пуста...</div>
+                <% } %>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="historyModal">
+        <div class="gw-modal">
+            <div class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></div>
+            
+            <div class="modal-head">
+                <span class="gw-modal-icon">📦</span>
+                <h2 class="modal-title" id="mTitle">Загрузка...</h2>
+                <span class="modal-reward" id="mReward">...</span>
+            </div>
+
+            <div class="modal-body-scroll">
+                <div class="modal-desc" id="mDesc">...</div>
+
+                <div class="winners-box">
+                    <div class="wb-title"><i class="fas fa-trophy"></i> Победители</div>
+                    <ul class="wb-list" id="mWinners"></ul>
+                </div>
+
+                <div class="participants-box">
+                    <div class="wb-title">
+                        <i class="fas fa-users"></i> Участники (<span id="mPartCount">0</span>)
+                    </div>
+                    <div class="part-grid" id="mParticipants">
+                        <div class="loader-spinner"><i class="fas fa-spinner fa-spin"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>">
+        const endedData = <%- JSON.stringify(ended) %>;
+        
+        function parseMDClient(text) {
+            if (!text) return '';
+            let html = text
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/__(.*?)__/g, '<u>$1</u>')
+                .replace(/~~(.*?)~~/g, '<s>$1</s>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/&lt;@!?(\d+)&gt;/g, '<span class="d-mention">@Пользователь</span>')
+                .replace(/\n/g, '<br>');
+            return html;
+        }
+
+        async function openHistoryModal(index) {
+            const item = endedData[index];
+            if(!item) return;
+
+            document.getElementById('mTitle').innerText = item.title;
+            document.getElementById('mDesc').innerHTML = parseMDClient(item.description);
+            document.getElementById('mReward').innerText = item.rewardsText || 'Награда';
+            document.getElementById('mPartCount').innerText = item.participants ? item.participants.length : 0;
+
+            const modalEl = document.querySelector('.gw-modal');
+            const isOfficial = item.giveawayType && item.giveawayType !== 'general';
+            document.querySelector('.gw-modal-icon').innerText = isOfficial ? '⭐' : '📦';
+            
+            if (isOfficial) {
+                modalEl.classList.add('official');
+            } else {
+                modalEl.classList.remove('official');
+            }
+
+            const wList = document.getElementById('mWinners');
+            wList.innerHTML = '';
+            if (item.winnerNames && item.winnerNames.length > 0) {
+                item.winnerNames.forEach(name => {
+                    const li = document.createElement('li');
+                    li.className = 'wb-item';
+                    li.innerHTML = `<i class="fas fa-crown" style="color:#FFD700;"></i> <span style="color:#fff;">${name}</span>`;
+                    wList.appendChild(li);
+                });
+            } else {
+                wList.innerHTML = '<li style="color:#666; font-size:0.9rem; padding:10px;">Нет победителей</li>';
+            }
+
+            const pList = document.getElementById('mParticipants');
+            pList.innerHTML = '<div class="loader-spinner"><i class="fas fa-spinner fa-spin"></i> Загрузка участников...</div>';
+
+            document.getElementById('historyModal').classList.add('active');
+
+            try {
+                const res = await fetch(`/api/giveaways/${item._id}/participants`);
+                const data = await res.json();
+
+                if (data.success && data.participants.length > 0) {
+                    pList.innerHTML = '';
+                    data.participants.forEach(p => {
+                        const div = document.createElement('div');
+                        div.className = 'part-item';
+                        const ava = p.avatar 
+                            ? `https://cdn.discordapp.com/avatars/${p.userId}/${p.avatar}.png` 
+                            : `https://cdn.discordapp.com/embed/avatars/0.png`;
+                        
+                        div.innerHTML = `<img src="${ava}" class="part-ava"><span class="part-name">${p.username}</span>`;
+                        pList.appendChild(div);
+                    });
+                } else {
+                    pList.innerHTML = '<div style="color:#666; font-size:0.8rem; padding:10px;">Список участников пуст или скрыт.</div>';
+                }
+            } catch (e) {
+                pList.innerHTML = '<div style="color:#e74c3c; font-size:0.8rem;">Ошибка загрузки.</div>';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('historyModal').classList.remove('active');
+        }
+
+        window.onclick = function(e) {
+            if (e.target.classList.contains('modal-overlay')) closeModal();
+        }
+
+        function updateTimers() {
+            document.querySelectorAll('.gw-timer').forEach(el => {
+                const end = parseInt(el.getAttribute('data-end'));
+                const now = new Date().getTime();
+                const diff = end - now;
+
+                if (diff <= 0) {
+                    el.innerHTML = "Завершено";
+                    return;
+                }
+
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                el.innerHTML = `<i class="fas fa-clock"></i> Осталось: ${d}д ${h}ч ${m}м`;
+            });
+        }
+        setInterval(updateTimers, 1000);
+        updateTimers();
+
+        async function joinGiveaway(id, btn) {
+            if (btn.disabled) return;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                const res = await fetch('/api/giveaways/join', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ giveawayId: id })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    btn.className = 'btn-join joined';
+                    btn.innerHTML = '<i class="fas fa-check"></i> Вы участвуете';
+                    const counter = document.getElementById('count-' + id);
+                    if(counter) counter.innerText = parseInt(counter.innerText) + 1;
+                } else {
+                    alert(data.error || 'Ошибка');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (e) {
+                alert('Ошибка сети');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+             if (typeof AOS !== 'undefined') AOS.init({ duration: 800, once: true, offset: 50 });
+        });
+    </script>
+</body>
+</html>

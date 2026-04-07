@@ -1,0 +1,25 @@
+User-agent: *
+
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /libs/  
+
+Disallow: /inventory
+Disallow: /deposit
+Disallow: /messages
+Disallow: /daily
+Disallow: /settings
+Disallow: /shop/buy      
+
+Disallow: /img/proxy/
+
+Disallow: /*?sort=
+Disallow: /*?period=
+Disallow: /*?filter=
+Disallow: /*?q=
+Disallow: /*?category= 
+
+Allow: /
+
+Sitemap: https://dachazeyna.com/sitemap.xml

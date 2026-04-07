@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Редактор Wiki' }) %>
+    <style>
+        :root { 
+            --panel-bg: #16181e; 
+            --border: rgba(255,255,255,0.08);
+            --accent: #5865F2;
+        }
+
+        .editor-container {
+            max-width: 1400px; margin: 100px auto 50px; padding: 0 20px;
+            display: grid; grid-template-columns: 1fr 350px; gap: 30px;
+            align-items: start;
+        }
+
+        .main-col { display: flex; flex-direction: column; gap: 20px; }
+
+        .card {
+            background: var(--panel-bg); border: 1px solid var(--border);
+            border-radius: 16px; padding: 25px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .title-input {
+            background: transparent; border: none; color: #fff;
+            font-size: 2rem; font-weight: 800; width: 100%; outline: none;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .title-input::placeholder { color: #444; }
+
+        .toolbar {
+            display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 15px;
+            border-bottom: 1px solid var(--border); margin-bottom: 15px;
+            position: sticky; top: 0; background: var(--panel-bg); z-index: 10;
+        }
+        .tool-btn {
+            background: rgba(255,255,255,0.05); border: none; color: #aaa;
+            width: 36px; height: 36px; border-radius: 8px; cursor: pointer;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .tool-btn:hover { background: #fff; color: #000; }
+        .tool-btn.ai-btn { width: auto; padding: 0 15px; color: #a020f0; background: rgba(160, 32, 240, 0.1); font-weight: bold; }
+        .tool-btn.ai-btn:hover { background: #a020f0; color: #fff; box-shadow: 0 4px 15px rgba(160, 32, 240, 0.4); }
+        .ai-btn.loading { animation: pulse 1.5s infinite; opacity: 0.7; pointer-events: none; }
+
+        textarea {
+            width: 100%; min-height: 600px; background: transparent; border: none;
+            color: #ddd; font-family: 'JetBrains Mono', monospace; font-size: 1rem;
+            line-height: 1.6; resize: vertical; outline: none;
+        }
+
+        .sidebar-col { display: flex; flex-direction: column; gap: 20px; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; color: #888; font-size: 0.8rem; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
+        
+        input[type="text"], select, textarea.desc-area {
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            padding: 12px; border-radius: 8px; color: #fff; transition: 0.3s;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus, select:focus, textarea.desc-area:focus { 
+            border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2); 
+        }
+
+        .file-upload-box {
+            border: 2px dashed var(--border); border-radius: 12px;
+            padding: 20px; text-align: center; cursor: pointer;
+            transition: 0.3s; position: relative; background: rgba(0,0,0,0.1);
+        }
+        .file-upload-box:hover { border-color: var(--accent); background: rgba(88, 101, 242, 0.05); }
+        .file-upload-box:hover .upload-icon { color: var(--accent); transform: translateY(-3px); }
+        .upload-icon { font-size: 2rem; color: #555; margin-bottom: 10px; transition: 0.3s; }
+        .upload-text { font-size: 0.9rem; color: #888; }
+        
+        .file-list { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .file-item {
+            background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem;
+        }
+        .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+        .file-remove { color: #e74c3c; cursor: pointer; padding: 5px; border-radius: 4px; transition: 0.2s; }
+        .file-remove:hover { background: rgba(231, 76, 60, 0.15); }
+
+        .existing-file { border-left: 3px solid #2ecc71; background: rgba(46, 204, 113, 0.05); }
+
+        .img-preview {
+            width: 100%; height: 150px; object-fit: cover; border-radius: 8px;
+            margin-top: 10px; display: none; border: 1px solid var(--border);
+        }
+        .img-preview.active { display: block; }
+
+        .btn-submit { 
+            background: var(--accent); color: #fff; border: none; padding: 15px; 
+            border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%;
+            font-size: 1rem; margin-top: 10px; transition: 0.2s;
+            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
+        }
+        .btn-submit:hover { background: #4752c4; transform: translateY(-2px); }
+
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); border-radius: 24px; transition: .3s; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .3s; }
+        input:checked + .slider { background-color: #2ecc71; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        @media (max-width: 1000px) {
+            .editor-container { grid-template-columns: 1fr; }
+            .sidebar-col { order: -1; } 
+        }
+        
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <form id="wikiForm" class="editor-container" enctype="multipart/form-data">
+        <% if (article) { %>
+            <input type="hidden" name="id" value="<%= article._id %>">
+        <% } %>
+
+        <div class="main-col">
+            <div class="card">
+                <input type="text" name="title" class="title-input" placeholder="Заголовок статьи..." value="<%= article ? article.title : '' %>" required>
+                <input type="text" name="slug" style="background: transparent; border: none; color: #666; font-size: 0.9rem; margin-top: 5px; outline: none; box-shadow: none; padding: 0;" placeholder="url-stati (оставь пустым для автогенерации)" value="<%= article ? article.slug : '' %>">
+            </div>
+
+            <div class="card" style="padding: 0;">
+                <div class="toolbar" style="padding: 15px; border-bottom: 1px solid var(--border); margin: 0;">
+                    <button type="button" class="tool-btn" onclick="insertTag('<h2>', '</h2>')" title="Заголовок H2">H2</button>
+                    <button type="button" class="tool-btn" onclick="insertTag('<h3>', '</h3>')" title="Заголовок H3">H3</button>
+                    <button type="button" class="tool-btn" onclick="insertTag('<b>', '</b>')" title="Жирный"><i class="fas fa-bold"></i></button>
+                    <button type="button" class="tool-btn" onclick="insertTag('<i>', '</i>')" title="Курсив"><i class="fas fa-italic"></i></button>
+                    <button type="button" class="tool-btn" onclick="insertTag('<code>', '</code>')" title="Код"><i class="fas fa-code"></i></button>
+                    <button type="button" class="tool-btn" onclick="insertTag('<ul>\n<li>', '</li>\n</ul>')" title="Список"><i class="fas fa-list-ul"></i></button>
+                    <button type="button" class="tool-btn" onclick="insertTag('<div class=\'note\'>', '</div>')" title="Заметка"><i class="fas fa-sticky-note"></i></button>
+                    
+                    <div style="width: 1px; background: var(--border); margin: 0 10px;"></div>
+                    
+                    <button type="button" class="tool-btn ai-btn" onclick="polishWithAI()">
+                        <i class="fas fa-magic" style="margin-right: 8px;"></i> AI Polish
+                    </button>
+                </div>
+                <textarea name="content" id="contentArea" placeholder="Пиши свой гайд здесь... Поддерживается HTML." style="padding: 20px;" required><%= article ? article.content : '' %></textarea>
+            </div>
+        </div>
+
+        <div class="sidebar-col">
+            
+            <div class="card">
+                <div class="toggle-row">
+                    <span style="font-weight: 700; color: #fff;">Опубликовать</span>
+                    <label class="switch">
+                        <input type="checkbox" name="isPublished" <%= (article && article.isPublished) || !article ? 'checked' : '' %>>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <button type="submit" class="btn-submit">Сохранить</button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="/admin/wiki" style="color: #888; font-size: 0.9rem; text-decoration: none; transition: 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">Отмена</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <label>Категория</label>
+                    <select name="category">
+                        <option value="guides" <%= article && article.category=='guides'?'selected':'' %>>Гайды</option>
+                        <option value="items" <%= article && article.category=='items'?'selected':'' %>>Предметы</option>
+                        <option value="bees" <%= article && article.category=='bees'?'selected':'' %>>Пчелы</option>
+                        <option value="mechanics" <%= article && article.category=='mechanics'?'selected':'' %>>Механики</option>
+                        <option value="server" <%= article && article.category=='server'?'selected':'' %>>О Сервере</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Краткое описание</label>
+                    <textarea name="description" class="desc-area" style="min-height: 80px; font-size: 0.9rem; resize: none;" required><%= article ? article.description : '' %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Теги (через запятую)</label>
+                    <input type="text" name="tags" value="<%= article ? article.tags.join(', ') : '' %>" placeholder="pvp, blue hive, macro">
+                </div>
+
+                <div class="form-group">
+                    <label>Иконка (FontAwesome)</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" name="icon" id="iconInput" value="<%= article ? article.icon : 'fas fa-book' %>" oninput="updateIconPreview()">
+                        <div id="iconPreview" style="width: 44px; height: 44px; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; border-radius: 8px; color: #fff; border: 1px solid var(--border); flex-shrink: 0;">
+                            <i class="<%= article ? article.icon : 'fas fa-book' %>"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <label>Обложка статьи</label>
+                <div class="file-upload-box" onclick="document.getElementById('mainImageInput').click()">
+                    <i class="fas fa-image upload-icon"></i>
+                    <div class="upload-text">Нажми, чтобы загрузить обложку</div>
+                    <input type="file" name="mainImage" id="mainImageInput" accept="image/*" hidden onchange="previewImage(this)">
+                </div>
+                <input type="hidden" name="currentImage" value="<%= article ? article.image : '' %>">
+                <img id="mainPreview" src="<%= article ? article.image : '' %>" class="img-preview <%= article && article.image ? 'active' : '' %>">
+            </div>
+
+            <div class="card">
+                <label>Файлы (Макросы, Конфиги)</label>
+                
+                <% if (article && article.attachments && article.attachments.length > 0) { %>
+                    <div class="file-list" id="existingFiles">
+                        <% article.attachments.forEach(file => { %>
+                            <div class="file-item existing-file" id="file-<%= file._id %>">
+                                <div class="file-name"><i class="fas fa-check-circle" style="color: #2ecc71; margin-right: 5px;"></i> <%= file.name %></div>
+                                <div class="file-remove" onclick="deleteAttachment('<%= article._id %>', '<%= file.path %>', 'file-<%= file._id %>')">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+
+                <div class="file-upload-box" style="margin-top: 15px;" onclick="document.getElementById('filesInput').click()">
+                    <i class="fas fa-file-archive upload-icon"></i>
+                    <div class="upload-text">Добавить файлы</div>
+                    <input type="file" name="files" id="filesInput" multiple hidden onchange="updateFileList(this)">
+                </div>
+                
+                <div class="file-list" id="newFileList"></div>
+            </div>
+        </div>
+    </form>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>">
+        function insertTag(open, close) {
+            const textarea = document.getElementById('contentArea');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            textarea.value = text.substring(0, start) + open + text.substring(start, end) + close + text.substring(end);
+            textarea.focus();
+            textarea.selectionEnd = start + open.length + (end - start);
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('mainPreview');
+                    img.src = e.target.result;
+                    img.classList.add('active');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function updateIconPreview() {
+            const val = document.getElementById('iconInput').value;
+            document.getElementById('iconPreview').innerHTML = `<i class="${val}"></i>`;
+        }
+
+        function updateFileList(input) {
+            const list = document.getElementById('newFileList');
+            list.innerHTML = '';
+            
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    const div = document.createElement('div');
+                    div.className = 'file-item';
+                    div.innerHTML = `
+                        <div class="file-name"><i class="fas fa-plus" style="color: #aaa; margin-right: 5px;"></i> ${file.name}</div>
+                        <div style="font-size: 0.7rem; color: #666;">${(file.size / 1024).toFixed(1)} KB</div>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+        }
+
+        async function polishWithAI() {
+            const textarea = document.getElementById('contentArea');
+            const titleInput = document.querySelector('input[name="title"]');
+            const rawText = textarea.value;
+
+            if (!rawText.trim()) { alert('Сначала напишите текст!'); return; }
+            if (!confirm('Gemini отформатирует текст. Продолжить?')) return;
+
+            const btn = document.querySelector('.ai-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 5px;"></i> Думаю...';
+            btn.classList.add('loading');
+
+            try {
+                const res = await fetch('/api/admin/wiki/ai-polish', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: rawText, context: titleInput.value })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    textarea.value = data.html;
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            } catch (e) { alert('Ошибка сети'); } 
+            finally {
+                btn.innerHTML = originalText;
+                btn.classList.remove('loading');
+            }
+        }
+
+        async function deleteAttachment(articleId, filePath, elementId) {
+            if (!confirm('Удалить этот файл навсегда?')) return;
+
+            try {
+                const res = await fetch('/api/admin/wiki/delete-attachment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ articleId, filePath })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    const el = document.getElementById(elementId);
+                    el.style.opacity = '0';
+                    setTimeout(() => el.remove(), 250);
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            } catch (e) {
+                alert('Ошибка сети');
+            }
+        }
+
+        document.getElementById('wikiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            formData.set('isPublished', e.target.isPublished.checked);
+
+            const btn = document.querySelector('.btn-submit');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 5px;"></i> Сохранение...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/wiki', {
+                    method: 'POST',
+                    body: formData 
+                });
+                const result = await res.json();
+                
+                if (result.success) {
+                    window.location.href = '/admin/wiki';
+                } else {
+                    alert('Ошибка: ' + result.error);
+                    btn.innerHTML = 'Сохранить';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Ошибка сети');
+                btn.innerHTML = 'Сохранить';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

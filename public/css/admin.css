@@ -1,0 +1,121 @@
+body {
+    background-color: #0b0c10;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0;
+    min-height: 100vh;
+    background-image: radial-gradient(#1a1c24 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.admin-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: #15171e;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.header-left {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #5865F2;
+    display: flex; align-items: center; gap: 10px;
+}
+
+.header-right {
+    display: flex; align-items: center; gap: 20px;
+    font-size: 0.9rem; color: #aaa;
+}
+.header-right b { color: #fff; }
+
+.btn-exit {
+    color: #ff5f56;
+    text-decoration: none;
+    font-weight: 700;
+    border: 1px solid rgba(255, 95, 86, 0.3);
+    padding: 5px 15px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+.btn-exit:hover { background: rgba(255, 95, 86, 0.1); }
+
+.apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.app-card {
+    background: #12141a;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: 0.3s;
+}
+
+.app-card:hover { transform: translateY(-5px); border-color: rgba(88, 101, 242, 0.3); }
+
+.app-card.status-approved { border-left: 4px solid #2ecc71; opacity: 0.7; }
+.app-card.status-rejected { border-left: 4px solid #e74c3c; opacity: 0.5; }
+.app-card.status-pending { border-left: 4px solid #f1c40f; }
+
+.app-header {
+    display: flex; justify-content: space-between;
+    font-size: 0.7rem; color: #666;
+}
+
+.app-user {
+    display: flex; align-items: center; gap: 10px;
+}
+.user-icon {
+    width: 40px; height: 40px; background: #5865F2; color: #fff;
+    border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem;
+}
+.app-user h3 { margin: 0; font-family: 'Montserrat', sans-serif; font-size: 1.1rem; }
+
+.app-reason label { font-size: 0.7rem; color: #555; text-transform: uppercase; display: block; margin-bottom: 5px; }
+.app-reason p { 
+    margin: 0; font-size: 0.9rem; line-height: 1.5; color: #ccc; 
+    background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;
+}
+
+.app-footer {
+    margin-top: auto;
+    display: flex; gap: 10px;
+}
+
+.btn-action {
+    flex: 1; padding: 10px; border: none; border-radius: 8px;
+    font-weight: 700; cursor: pointer; font-family: inherit;
+    display: flex; justify-content: center; align-items: center; gap: 8px;
+    transition: 0.2s;
+}
+
+.btn-action.approve { background: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+.btn-action.approve:hover { background: #2ecc71; color: #000; }
+
+.btn-action.reject { background: rgba(231, 76, 60, 0.1); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
+.btn-action.reject:hover { background: #e74c3c; color: #fff; }
+
+.status-badge {
+    width: 100%; text-align: center; padding: 10px; border-radius: 8px; font-weight: 800;
+}
+.status-badge.approved { color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
+.status-badge.rejected { color: #e74c3c; background: rgba(231, 76, 60, 0.1); }
+
+.empty-state { text-align: center; grid-column: 1 / -1; padding: 50px; color: #555; }
+.empty-state i { font-size: 4rem; margin-bottom: 20px; }

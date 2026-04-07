@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'База Знаний | Дача Зейна' }) %>
+    <link rel="preload" href="/css/wiki.css" as="style">
+    <link rel="stylesheet" href="/css/wiki.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="wiki-bg">
+        <div class="bg-grid"></div>
+        <div class="bg-glow glow-1"></div>
+        <div class="bg-glow glow-2"></div>
+    </div>
+
+    <main class="wiki-wrapper">
+        <div class="wiki-hero" data-aos="fade-down">
+            <div class="hero-badge">Энциклопедия</div>
+            <h1 class="wiki-h1">База знаний <span class="text-gradient">Дачи Зейна</span></h1>
+            <p class="wiki-subtitle">Гайды по Bee Swarm Simulator, правила сервера и подробные инструкции по механикам.</p>
+            
+            <form action="/wiki" method="GET" class="search-box">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search search-icon-left"></i>
+                    <input type="text" name="q" class="search-input" placeholder="Найти гайд, предмет или правило..." value="<%= searchQuery || '' %>" autocomplete="off">
+                    <button type="submit" class="search-btn" aria-label="Найти">Найти</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="wiki-container">
+            <% const cats = [
+                { id: 'guides', name: 'Гайды и Советы', icon: 'fas fa-book-open', color: '#3498db' },
+                { id: 'items', name: 'Предметы', icon: 'fas fa-cube', color: '#f1c40f' },
+                { id: 'bees', name: 'Пчелы', icon: 'fas fa-bug', color: '#e67e22' },
+                { id: 'mechanics', name: 'Механики', icon: 'fas fa-cogs', color: '#9b59b6' },
+                { id: 'server', name: 'О Сервере', icon: 'fas fa-info-circle', color: '#2ecc71' }
+            ]; %>
+
+            <% cats.forEach((cat, index) => { %>
+                <% if (categories[cat.id] && categories[cat.id].length > 0) { %>
+                    <section class="cat-section" data-aos="fade-up" data-aos-delay="<%= index * 100 %>"> 
+                        <h2 class="cat-title">
+                            <div class="cat-icon-wrapper" style="color: <%= cat.color %>; background: <%= cat.color %>20;">
+                                <i class="<%= cat.icon %>"></i>
+                            </div>
+                            <%= cat.name %>
+                        </h2>
+                        
+                        <div class="articles-grid">
+                            <% categories[cat.id].forEach(art => { %>
+                                <a href="/wiki/<%= art.slug %>" class="art-card" title="<%= art.title %>">
+                                    <article> 
+                                        <div class="art-header">
+                                            <div class="art-icon"><i class="<%= art.icon || 'fas fa-file-alt' %>"></i></div>
+                                            <div class="art-meta-top">
+                                                <span><i class="far fa-calendar-alt"></i> <%= new Date(art.createdAt).toLocaleDateString('ru-RU', {day: 'numeric', month: 'short'}) %></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <h3 class="art-title"><%= art.title %></h3> 
+                                        <p class="art-desc"><%= art.description %></p>
+                                        
+                                        <div class="art-meta-bottom">
+                                            <span class="read-more">Читать статью <i class="fas fa-arrow-right"></i></span>
+                                            <span class="views-count"><i class="far fa-eye"></i> <%= art.views || 0 %></span>
+                                        </div>
+                                    </article>
+                                </a>
+                            <% }) %>
+                        </div>
+                    </section>
+                <% } %>
+            <% }); %>
+
+            <% if (Object.values(categories).flat().length === 0) { %>
+                <div class="empty-search" data-aos="zoom-in">
+                    <div class="empty-icon"><i class="fas fa-search-minus"></i></div>
+                    <h3>Ничего не найдено</h3>
+                    <p>По вашему запросу «<b><%= searchQuery %></b>» нет результатов. <br>Попробуйте использовать другие ключевые слова.</p>
+                    <a href="/wiki" class="btn-clear-search">Сбросить поиск</a>
+                </div>
+            <% } %>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>">
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof AOS !== 'undefined') {
+                AOS.init({ once: true, offset: 50, duration: 600 });
+            }
+        });
+
+        const loadAnalytics = () => {
+            if (window.analyticsLoaded) return;
+            window.analyticsLoaded = true;
+
+            const gtmScript = document.createElement('script');
+            gtmScript.async = true;
+            gtmScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-17815408362'; 
+            document.head.appendChild(gtmScript);
+
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17815408362');
+
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "um1b962jsc");
+        };
+
+        window.addEventListener('scroll', loadAnalytics, { once: true });
+        window.addEventListener('mousemove', loadAnalytics, { once: true });
+        window.addEventListener('touchstart', loadAnalytics, { once: true });
+        setTimeout(loadAnalytics, 3500);
+    </script>
+</body>
+</html>

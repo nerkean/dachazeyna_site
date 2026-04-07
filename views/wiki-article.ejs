@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: title + ' | Дача Зейна' }) %>
+    <link rel="stylesheet" href="/css/wiki-article.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="wiki-bg">
+        <div class="bg-grid"></div>
+        <div class="bg-glow"></div>
+    </div>
+
+    <main class="article-wrapper">
+        
+        <nav class="crumbs" aria-label="Хлебные крошки" data-aos="fade-right">
+            <a href="/"><i class="fas fa-home"></i> Главная</a> 
+            <i class="fas fa-chevron-right sep"></i> 
+            <a href="/wiki">База Знаний</a> 
+            <i class="fas fa-chevron-right sep"></i> 
+            <span class="current"><%= article.category %></span>
+        </nav>
+
+        <header class="art-header" data-aos="fade-down">
+            <div class="art-tag"><i class="fas fa-folder-open"></i> <%= article.category.toUpperCase() %></div>
+            
+            <h1 class="art-h1"><%= article.title %></h1>
+            
+            <p class="art-description"><%= article.description %></p>
+
+            <div class="art-meta">
+                <div class="meta-item author-badge">
+                    <div class="author-avatar"><%= article.author.charAt(0).toUpperCase() %></div>
+                    <span itemprop="author"><%= article.author %></span>
+                </div>
+                <div class="meta-item">
+                    <i class="far fa-calendar-alt"></i>
+                    <time datetime="<%= article.createdAt %>"><%= new Date(article.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) %></time>
+                </div>
+                <div class="meta-item">
+                    <i class="far fa-eye"></i> <%= article.views || 0 %> просмотров
+                </div>
+            </div>
+        </header>
+
+        <div class="content-container" data-aos="fade-up">
+            
+            <div id="toc-container" class="toc-wrapper" style="display: none;">
+                <div class="toc-box">
+                    <div class="toc-title"><i class="fas fa-list-ul"></i> Содержание</div>
+                    <ul class="toc-list" id="toc-list"></ul>
+                </div>
+            </div>
+
+            <% 
+                let allImages = [];
+                if (article.image) allImages.push(article.image);
+                if (article.gallery && article.gallery.length > 0) {
+                    allImages = allImages.concat(article.gallery);
+                }
+            %>
+
+            <% if (allImages.length > 0) { %>
+                <div class="art-slider-wrap">
+                    <% if (allImages.length > 1) { %>
+                        <button class="slider-btn slider-prev" onclick="moveSlide(-1)" aria-label="Назад"><i class="fas fa-chevron-left"></i></button>
+                        <button class="slider-btn slider-next" onclick="moveSlide(1)" aria-label="Вперед"><i class="fas fa-chevron-right"></i></button>
+                        <div class="slider-badge"><i class="far fa-image"></i> <span id="slideCounter">1 / <%= allImages.length %></span></div>
+                    <% } %>
+
+                    <div class="art-slider-track" id="wikiSlider">
+                        <% allImages.forEach((img, index) => { %>
+                            <div class="art-slide" onclick="openLightbox('<%= img %>')">
+                                <img src="<%= img %>" 
+                                     alt="<%= article.title %> - изображение <%= index + 1 %>" 
+                                     loading="<%= index === 0 ? 'eager' : 'lazy' %>" 
+                                     fetchpriority="<%= index === 0 ? 'high' : 'auto' %>">
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            <% } %>
+
+            <div class="content-body">
+                <%- article.content %>
+            </div>
+        </div>
+
+        <% if (article.attachments && article.attachments.length > 0) { %>
+            <div class="attachments-box" data-aos="fade-up">
+                <h3 class="attach-title"><i class="fas fa-paperclip"></i> Прикрепленные файлы</h3>
+                <div class="attach-list">
+                    <% article.attachments.forEach(file => { %>
+                        <a href="<%= file.path %>" download class="attach-item">
+                            <div class="attach-info">
+                                <div class="file-icon-box"><i class="fas fa-file-download"></i></div>
+                                <span class="attach-name"><%= file.name %></span>
+                            </div>
+                            <span class="attach-btn">Скачать</span>
+                        </a>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
+
+        <% if (related && related.length > 0) { %>
+            <div class="related-box" data-aos="fade-up">
+                <h3 class="rel-title"><i class="fas fa-link"></i> Смотрите также</h3>
+                <div class="rel-grid">
+                    <% related.forEach(r => { %>
+                        <a href="/wiki/<%= r.slug %>" class="rel-card">
+                            <div class="rel-icon"><i class="<%= r.icon || 'fas fa-book' %>"></i></div>
+                            <div class="rel-info">
+                                <h4><%= r.title %></h4>
+                                <span>Читать <i class="fas fa-arrow-right"></i></span>
+                            </div>
+                        </a>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
+    </main>
+
+    <%- include('partials/footer') %>
+
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox(event)" aria-hidden="true"> 
+        <div class="lightbox-content">
+            <button class="lightbox-close" onclick="closeLightbox(event)" aria-label="Закрыть">&times;</button>
+            <img src="" id="lightboxImg" alt="Увеличенное изображение">
+        </div>
+    </div>
+
+    <script nonce="<%= nonce %>">
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof AOS !== 'undefined') AOS.init({ once: true, offset: 50, duration: 600 });
+        });
+
+        const track = document.getElementById('wikiSlider');
+        const badgeCounter = document.getElementById('slideCounter');
+
+        function moveSlide(direction) {
+            if (!track) return;
+            const slideWidth = track.clientWidth;
+            track.scrollBy({ left: direction * slideWidth, behavior: 'smooth' });
+        }
+
+        if (track && badgeCounter) {
+            track.addEventListener('scroll', () => {
+                const slideWidth = track.clientWidth;
+                const scrollPos = track.scrollLeft;
+                const currentIndex = Math.round(scrollPos / slideWidth) + 1;
+                const total = badgeCounter.innerText.split('/')[1].trim(); 
+                badgeCounter.innerText = `${currentIndex} / ${total}`;
+            });
+        }
+
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            img.src = src;
+            lb.style.display = 'flex';
+            requestAnimationFrame(() => lb.classList.add('active'));
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeLightbox(e) {
+            if (e.target.id === 'lightbox' || e.target.classList.contains('lightbox-close')) {
+                const lb = document.getElementById('lightbox');
+                lb.classList.remove('active');
+                document.body.style.overflow = ''; 
+                setTimeout(() => { 
+                    document.getElementById('lightboxImg').src = ''; 
+                    lb.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const contentImages = document.querySelectorAll('.content-body img:not(.art-slide img)');
+            contentImages.forEach(img => {
+                img.setAttribute('loading', 'lazy'); 
+                img.addEventListener('click', () => openLightbox(img.src));
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const content = document.querySelector('.content-body');
+            if(!content) return;
+            
+            const headings = content.querySelectorAll('h2, h3');
+            const tocList = document.getElementById('toc-list');
+            const tocContainer = document.getElementById('toc-container');
+
+            if (headings.length > 1) {
+                tocContainer.style.display = 'block';
+                headings.forEach((header, index) => {
+                    if (!header.id) header.id = 'wiki-section-' + index;
+
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = '#' + header.id;
+                    a.textContent = header.textContent;
+                    
+                    if (header.tagName === 'H3') li.classList.add('toc-sub');
+                    
+                    li.appendChild(a);
+                    tocList.appendChild(li);
+
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const yOffset = -100;
+                        const y = header.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                        history.pushState(null, null, '#' + header.id);
+                    });
+                });
+            }
+
+            document.querySelectorAll('pre code, .code-block').forEach(code => {
+                if (code.innerText.length > 10) { 
+                    const pre = code.parentNode;
+                    pre.style.position = 'relative';
+                    
+                    const btn = document.createElement('button');
+                    btn.className = 'copy-code-btn';
+                    btn.innerHTML = '<i class="far fa-copy"></i> Копировать';
+                    btn.setAttribute('aria-label', 'Скопировать код'); 
+                    
+                    btn.onclick = () => {
+                        navigator.clipboard.writeText(code.innerText);
+                        btn.innerHTML = '<i class="fas fa-check"></i> Скопировано';
+                        btn.classList.add('copied');
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="far fa-copy"></i> Копировать';
+                            btn.classList.remove('copied');
+                        }, 2500);
+                    };
+                    
+                    pre.appendChild(btn);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

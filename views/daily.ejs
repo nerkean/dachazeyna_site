@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Ежедневные награды' }) %>
+    
+    <link rel="preload" href="/css/daily.css" as="style">
+    <link rel="stylesheet" href="/css/daily.css">
+    
+    <style>
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(88, 101, 242, 0.7); transform: scale(1); }
+            50% { box-shadow: 0 0 20px 5px rgba(88, 101, 242, 0.4); transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(88, 101, 242, 0); transform: scale(1); }
+        }
+        .r-card.active {
+            animation: pulse-glow 2s infinite ease-in-out;
+            border: 2px solid #5865F2;
+            z-index: 10;
+        }
+        .btn-claim.processing {
+            opacity: 0.8;
+            cursor: wait;
+            transform: scale(0.98);
+        }
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="daily-wrapper">
+        
+        <header class="d-header">
+            <h1>Ежедневные Награды</h1>
+            <p>Заходи каждый день, чтобы не потерять серию!</p>
+        </header>
+
+        <div class="streak-badge">
+            <span class="s-fire">🔥</span>
+            <span class="s-text">Серия: <span><%= streak %></span> дней</span>
+        </div>
+
+        <div class="rewards-track" role="list">
+            <% rewards.forEach(r => { %>
+                <% 
+                    let statusClass = '';
+                    if (r.day < currentDay) {
+                        statusClass = 'claimed'; 
+                    } else if (r.day === currentDay) {
+                        statusClass = canClaim ? 'active' : 'claimed'; 
+                    } else {
+                        statusClass = 'locked';
+                    }
+
+                    if (r.day === 10 || r.day === 20) statusClass += ` day-${r.day}`;
+                    if (r.day === 30) statusClass += ' day-30';
+                %>
+
+                <div class="r-card <%= statusClass %>" role="listitem" aria-label="День <%= r.day %>: <%= r.description %>">
+                    <div class="r-day">День <%= r.day %></div>
+                    <div class="r-icon"><%= r.emoji %></div>
+                    <div class="r-val"><%= r.description %></div>
+                    
+                    <% if(statusClass.includes('claimed')) { %>
+                        <div class="r-overlay" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); border-radius: inherit; font-size: 2rem;">
+                            ✅
+                        </div>
+                    <% } %>
+                </div>
+            <% }) %>
+        </div>
+
+        <div class="action-area">
+            <% if (canClaim) { %>
+                <button class="btn-claim" onclick="claimReward(this)" aria-label="Забрать награду">
+                    ЗАБРАТЬ НАГРАДУ
+                </button>
+            <% } else { %>
+                <button class="btn-claim" disabled aria-label="Награда недоступна">
+                    ВЕРНИСЬ ПОЗЖЕ
+                </button>
+                <div class="timer-box">
+                    До следующей награды: <span id="countdown">--:--:--</span>
+                </div>
+            <% } %>
+        </div>
+
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>" src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+
+    <script nonce="<%= nonce %>">
+        const nextTime = <%- JSON.stringify(nextClaimTime) %>;
+        
+        if (nextTime) {
+            const timerEl = document.getElementById('countdown');
+            
+            function updateTimer() {
+                const now = new Date().getTime();
+                const diff = nextTime - now;
+
+                if (diff <= 0) {
+                    location.reload(); 
+                    return;
+                }
+
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                if (timerEl) timerEl.innerText = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            }
+
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        const winSound = new Audio('/assets/sounds/winner.mp3');
+        winSound.volume = 0.5;
+
+        async function claimReward(btn) {
+            if(btn.disabled) return;
+            const originalText = btn.innerText;
+            
+            btn.disabled = true;
+            btn.classList.add('processing');
+            btn.innerText = "ОБРАБОТКА...";
+
+            try {
+                const res = await fetch('/api/daily/claim', { method: 'POST' });
+                const data = await res.json();
+
+                if (data.success) {
+                    winSound.play().catch(e => console.log('Звук не загрузился', e));
+
+                    if (typeof confetti === 'function') {
+                        var myCanvas = document.getElementById('confetti-canvas');
+                        var myConfetti = confetti.create(myCanvas, { resize: true });
+                        myConfetti({
+                            particleCount: 200,
+                            spread: 100,
+                            origin: { y: 0.6 },
+                            colors: ['#5865F2', '#FFD700', '#FF005C', '#00FF00'],
+                            disableForReducedMotion: true
+                        });
+                    }
+
+                    if (typeof Modal !== 'undefined') {
+                        await Modal.alert("Награда получена! 🎉", data.message || "Ты успешно забрал награду! Заходи завтра, чтобы продолжить серию.", "success");
+                    } else {
+                        alert(data.message || "Награда получена!");
+                    }
+                    
+                    setTimeout(() => location.reload(), 300);
+                } else {
+                    if (typeof Modal !== 'undefined') Modal.alert("Ошибка", data.error, "error");
+                    else alert(data.error);
+                    
+                    btn.disabled = false;
+                    btn.classList.remove('processing');
+                    btn.innerText = originalText;
+                }
+            } catch (e) {
+                console.error(e);
+                btn.disabled = false;
+                btn.classList.remove('processing');
+                btn.innerText = "ОШИБКА. ПОВТОРИТЬ";
+            }
+        }
+    </script>
+</body>
+</html>

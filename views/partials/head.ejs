@@ -1,0 +1,99 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+
+<title><%= typeof title !== 'undefined' ? title : 'Дача Зейна | BSS Community' %></title>
+<meta name="description" content="<%= typeof description !== 'undefined' ? description : 'Крупнейшее сообщество по Bee Swarm Simulator. Экономика, биржа акций, ивенты и уникальный бот' %>">
+<meta name="theme-color" content="#5865F2">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Dachazeyna">
+
+<% if (typeof noIndex !== 'undefined' && noIndex) { %>
+    <meta name="robots" content="noindex, nofollow">
+<% } else { %>
+    <meta name="robots" content="index, follow">
+<% } %>
+
+<link rel="canonical" href="https://dachazeyna.com<%= typeof currentPath !== 'undefined' ? currentPath : '' %>">
+
+<meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>">
+<meta property="og:site_name" content="Дача Зейна">
+<meta property="og:url" content="https://dachazeyna.com<%= typeof currentPath !== 'undefined' ? currentPath : '' %>">
+<meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'Дача Зейна' %>">
+<meta property="og:description" content="<%= typeof description !== 'undefined' ? description : 'Официальный Discord «Дача Зейна» — крупное русскоязычное сообщество по Bee Swarm Simulator (Roblox).' %>">
+<meta property="og:image" content="<%= typeof image !== 'undefined' ? image : 'https://dachazeyna.com/assets/img/og-image.png' %>">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicons/favicon.svg" />
+<link rel="icon" type="image/png" href="/assets/img/favicons/favicon-96x96.png" sizes="96x96" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="Дача Зейна" />
+<link rel="manifest" href="/assets/img/favicons/site.webmanifest" />
+
+<link rel="preload" href="/assets/fonts/web/montserrat-v31-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/web/montserrat-v31-cyrillic_latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/web/montserrat-v31-cyrillic_latin-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/web/montserrat-v31-cyrillic_latin-700.woff2" as="font" type="font/woff2" crossorigin>
+
+<link rel="preload" href="/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/webfonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+
+<style>
+    @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 400; font-display: swap; src: url('/assets/fonts/web/montserrat-v31-cyrillic_latin-regular.woff2') format('woff2'); }
+    @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 500; font-display: swap; src: url('/assets/fonts/web/montserrat-v31-cyrillic_latin-500.woff2') format('woff2'); }
+    @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 700; font-display: swap; src: url('/assets/fonts/web/montserrat-v31-cyrillic_latin-700.woff2') format('woff2'); }
+    @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 900; font-display: swap; src: url('/assets/fonts/web/montserrat-v31-cyrillic_latin-900.woff2') format('woff2'); }
+    
+    .modal-overlay { display: none; opacity: 0; pointer-events: none; }
+    .modal-overlay.active { display: flex; opacity: 1; pointer-events: all; }
+</style>
+
+<link rel="preload" href="/css/common.css" as="style">
+<link rel="stylesheet" href="/css/common.css">
+
+<link rel="preload" href="/css/modals.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/css/modals.css"></noscript>
+
+<link rel="preload" href="/libs/aos.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/libs/aos.css"></noscript>
+
+<link rel="stylesheet" href="/libs/fontawesome.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/libs/fontawesome.css"></noscript>
+
+<% if (typeof currentPath === 'undefined' || (currentPath !== '/' && !currentPath.startsWith('/wiki'))) { %>
+    <script nonce="<%= locals.nonce %>">
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const scriptGA = document.createElement('script');
+                scriptGA.async = true;
+                scriptGA.src = 'https://www.googletagmanager.com/gtag/js?id=AW-17815408362';
+                document.head.appendChild(scriptGA);
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'AW-17815408362');
+                <% if (typeof gaId !== 'undefined' && gaId) { %>
+                    gtag('config', '<%= gaId %>');
+                <% } %>
+
+                (function(c,l,a,r,i,t,y){
+                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window, document, "clarity", "script", "um1b962jsc");
+                
+            }, 3500); 
+        });
+    </script>
+<% } %>
+
+<% if (typeof jsonLD !== 'undefined' && jsonLD) { %>
+<script type="application/ld+json" nonce="<%= locals.nonce %>">
+    <%- JSON.stringify(jsonLD) %>
+</script>
+<% } %>
+
+<script src="/libs/aos.js" defer></script> 
+<script src="/js/modals.js" defer></script>

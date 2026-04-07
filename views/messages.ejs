@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Сообщения' }) %>
+    <link rel="stylesheet" href="/css/messages.css">
+    <script nonce="<%= nonce %>" src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <main class="messenger-wrapper">
+        
+        <div class="chat-sidebar" id="sidebar">
+            <div class="chat-header"><h2>Сообщения</h2></div>
+            <div class="chat-list" id="chatList">
+                <div style="text-align:center; padding:20px; color:#666;"><i class="fas fa-spinner fa-spin"></i> Загрузка...</div>
+            </div>
+        </div>
+
+        <div class="chat-main" id="chatMain">
+            <div class="empty-chat" id="emptyState">
+                <i class="far fa-comments" aria-hidden="true"></i>
+                <p>Выберите чат, чтобы начать общение</p>
+            </div>
+
+            <div id="activeChatContainer" style="display: none; flex: 1; flex-direction: column; height: 100%;">
+                
+                <div class="cm-header">
+                    <i class="fas fa-arrow-left back-btn" onclick="closeChat()" aria-label="Назад" role="button" tabindex="0"></i>
+                    <a href="#" id="headerProfileLink" class="chat-header-link" style="flex:1">
+                        <img src="" class="ci-avatar" id="headerAvatar" alt="Аватар собеседника">
+                        <div class="ci-info">
+                            <div class="ci-name" id="headerName">...</div>
+                            <div class="ci-time" id="headerStatus">Нажмите, чтобы открыть профиль</div>
+                        </div>
+                    </a>
+                    
+                    <button class="chat-action-btn danger" onclick="toggleBlockUser()" title="Заблокировать / Разблокировать" aria-label="Блокировка">
+                        <i class="fas fa-ban"></i>
+                    </button>
+                </div>
+
+                <div class="cm-messages" id="messagesContainer"></div>
+
+                <div class="preview-container" id="imagePreviewBox" style="display: none;">
+                    <div class="preview-close" onclick="clearImage()"><i class="fas fa-times"></i></div>
+                    <img src="" class="preview-img" id="imagePreviewImg" alt="Предпросмотр">
+                </div>
+
+                <div class="blocked-overlay" id="blockedPanel" style="display: none;">
+                    <span class="blocked-text" id="blockedMsg"><i class="fas fa-ban"></i> Чат недоступен</span>
+                    <button class="btn-unblock" id="unblockBtn" onclick="toggleBlockUser()" style="display: none;">Разблокировать</button>
+                </div>
+
+                <div class="cm-input-area" id="inputArea">
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(this)">
+                    <button class="chat-attach-btn" onclick="document.getElementById('fileInput').click()" title="Прикрепить фото" aria-label="Прикрепить файл">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+
+                    <input type="text" id="msgInput" class="chat-input" placeholder="Напишите сообщение..." autocomplete="off" aria-label="Текст сообщения">
+                    <button class="chat-send-btn" onclick="sendMessage()" aria-label="Отправить">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()" aria-hidden="true">
+        <div class="lightbox-close" onclick="closeLightbox()">×</div>
+        <img src="" class="lightbox-img" id="lightboxImg" onclick="event.stopPropagation()" alt="Просмотр изображения">
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>">
+        const myId = "<%= user.id %>";
+        let currentPartnerId = "<%= activeChatId || '' %>"; 
+        let selectedFile = null;
+        let isBlockedByMe = false; 
+        
+        const socket = io({ transports: ['websocket'], upgrade: false });
+
+        socket.on('new_message', (data) => {
+            if (currentPartnerId === data.message.senderId) {
+                appendMessage(data.message, true);
+                markAsRead(currentPartnerId);
+            } 
+            loadConversations();
+        });
+
+        socket.on('messages_read', (data) => {
+            if (currentPartnerId === data.readerId) {
+                document.querySelectorAll('.msg.out .status-icon').forEach(el => {
+                    el.className = 'status-icon status-read';
+                    el.title = 'Прочитано';
+                    el.innerHTML = '<i class="fas fa-check-double"></i>'; 
+                });
+            }
+        });
+
+        socket.on('user_status', (data) => {
+            if (currentPartnerId === data.userId) {
+                updateHeaderStatusUI(data.status === 'online');
+            }
+            
+            const listItem = document.querySelector(`.chat-item[onclick="openChat('${data.userId}')"] .ci-avatar`);
+            if (listItem) {
+                if (data.status === 'online') listItem.style.borderColor = '#2ecc71'; 
+                else listItem.style.borderColor = 'transparent';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConversations();
+            if (currentPartnerId) openChat(currentPartnerId);
+        });
+
+        function updateHeaderStatusUI(isOnline) {
+            const el = document.getElementById('headerStatus');
+            if (isOnline) {
+                el.innerHTML = '<span style="color: #2ecc71; text-shadow: 0 0 10px rgba(46,204,113,0.4);">● В сети</span>';
+            } else {
+                el.innerHTML = '<span style="color: #999;">Не в сети</span>';
+            }
+        }
+
+        async function markAsRead(partnerId) {
+            try {
+                await fetch('/api/messages/mark_read', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ partnerId })
+                });
+            } catch(e) {}
+        }
+
+        async function loadConversations() {
+            try {
+                const res = await fetch('/api/messages/conversations');
+                const data = await res.json();
+                const list = document.getElementById('chatList');
+                
+                if (data.success && data.conversations.length > 0) {
+                    list.innerHTML = data.conversations.map(c => {
+                        const ava = c.avatar ? `https://cdn.discordapp.com/avatars/${c.partnerId}/${c.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/0.png`;
+                        const activeClass = c.partnerId === currentPartnerId ? 'active' : '';
+                        const unreadClass = c.unread > 0 ? 'unread' : '';
+                        
+                        const msgDate = new Date(c.timestamp);
+                        const now = new Date();
+                        let dateStr;
+                        if (msgDate.toDateString() === now.toDateString()) {
+                            dateStr = msgDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        } else {
+                            dateStr = msgDate.toLocaleDateString('ru-RU', {day: 'numeric', month: 'short'});
+                        }
+
+                        let previewText = c.lastMessage ? escapeHtml(c.lastMessage) : '<i class="fas fa-camera"></i> Фотография';
+                        if (c.lastMessage && c.lastMessage.length > 30) previewText = previewText.substring(0, 30) + '...';
+
+                        return `
+                            <div class="chat-item ${activeClass} ${unreadClass}" onclick="openChat('${c.partnerId}')" role="button" tabindex="0">
+                                <img src="${ava}" class="ci-avatar" alt="${c.username}">
+                                <div class="ci-info">
+                                    <div class="ci-top">
+                                        <span class="ci-name">${c.username}</span>
+                                        <span class="ci-time">${dateStr}</span>
+                                    </div>
+                                    <div class="ci-preview">
+                                        ${c.partnerId === myId ? '<i class="fas fa-reply" style="font-size:0.8em; opacity:0.7"></i> ' : ''}
+                                        ${previewText}
+                                    </div>
+                                </div>
+                                ${c.unread > 0 ? `<div class="unread-count-badge">${c.unread}</div>` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    list.innerHTML = `
+                        <div style="padding:40px 20px; text-align:center; color:#666;">
+                            <i class="far fa-paper-plane" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.3;"></i>
+                            <p>Нет диалогов</p>
+                        </div>`;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function openChat(partnerId) {
+            currentPartnerId = partnerId;
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('activeChatContainer').style.display = 'flex';
+            if (window.innerWidth <= 900) document.getElementById('chatMain').classList.add('open');
+
+            document.getElementById('headerProfileLink').href = `/profile/${partnerId}`;
+            
+            clearImage();
+            document.getElementById('inputArea').style.display = 'flex';
+            document.getElementById('blockedPanel').style.display = 'none';
+
+            loadConversations(); 
+
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#666;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+
+            try {
+                document.getElementById('headerStatus').innerText = '...';
+                
+                const res = await fetch(`/api/users/status/${partnerId}`);
+                const statusData = await res.json();
+                updateHeaderStatusUI(statusData.isOnline);
+            } catch(e) {
+                updateHeaderStatusUI(false);
+            }
+
+            await loadMessages();
+        }
+
+        async function loadMessages() {
+            if (!currentPartnerId) return;
+            try {
+                const res = await fetch(`/api/messages/chat/${currentPartnerId}`);
+                const data = await res.json();
+                
+                if (data.success) {
+                    const partner = data.partner;
+                    document.getElementById('headerName').innerText = partner.username;
+                    document.getElementById('headerAvatar').src = partner.avatar ? `https://cdn.discordapp.com/avatars/${currentPartnerId}/${partner.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+                    if (data.blockStatus) updateBlockUI(data.blockStatus);
+                    else updateBlockUI({ iBlockedHim: false, heBlockedMe: false });
+
+                    const container = document.getElementById('messagesContainer');
+                    container.innerHTML = ''; 
+                    
+                    if (data.messages.length === 0) {
+                        container.innerHTML = `
+                            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.3;">
+                                <i class="fas fa-hand-sparkles" style="font-size:3rem; margin-bottom:15px;"></i>
+                                <p>Начните общение!</p>
+                            </div>
+                        `;
+                    } else {
+                        data.messages.forEach(msg => appendMessage(msg, false));
+                    }
+                    
+                    container.scrollTop = container.scrollHeight;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function appendMessage(msg, shouldScroll = true) {
+            const container = document.getElementById('messagesContainer');
+            const isMine = msg.senderId === myId;
+            const time = new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const elementId = msg.tempId ? `temp-${msg.tempId}` : `msg-${msg._id}`;
+
+            let statusIcon = '';
+            if (isMine) {
+                const iconClass = msg.isRead ? 'status-icon status-read' : 'status-icon status-sent';
+                const iconHtml = msg.isRead ? '<i class="fas fa-check-double"></i>' : '<i class="fas fa-check"></i>';
+                statusIcon = `<span class="${iconClass}" title="${msg.isRead ? 'Прочитано' : 'Отправлено'}">${iconHtml}</span>`;
+            }
+
+            let imageHtml = '';
+            if (msg.imageUrl) imageHtml = `<img src="${msg.imageUrl}" class="msg-image" onclick="openLightbox(this.src)" alt="Вложение">`;
+            
+            let textHtml = '';
+            if (msg.content) textHtml = `<div class="msg-content">${escapeHtml(msg.content)}</div>`;
+
+            const html = `
+                <div class="msg ${isMine ? 'out' : 'in'}" id="${elementId}">
+                    ${imageHtml}
+                    ${textHtml}
+                    <div class="msg-time">${time} ${statusIcon}</div>
+                </div>
+            `;
+            
+            if (container.querySelector('.fa-hand-sparkles')) container.innerHTML = '';
+
+            container.insertAdjacentHTML('beforeend', html);
+            if (shouldScroll) container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        }
+
+        function markMessageFailed(tempId) {
+            const el = document.getElementById(`temp-${tempId}`);
+            if (el) {
+                el.style.opacity = '0.7';
+                const timeEl = el.querySelector('.msg-time');
+                if (timeEl) timeEl.innerHTML += ' <span style="color:#ff4d4d; margin-left:5px;"><i class="fas fa-exclamation-circle"></i> Ошибка</span>';
+            }
+        }
+
+        async function toggleBlockUser() {
+            if (!currentPartnerId) return;
+
+            const action = isBlockedByMe ? 'unblock' : 'block';
+            const title = isBlockedByMe ? 'Разблокировка' : 'Блокировка';
+            const text = isBlockedByMe 
+                ? `Разблокировать пользователя <b>${document.getElementById('headerName').innerText}</b>?`
+                : `Заблокировать пользователя <b>${document.getElementById('headerName').innerText}</b>?<br><span style="font-size:0.8em; opacity:0.7">Он не сможет писать вам.</span>`;
+
+            if (typeof Modal !== 'undefined') {
+                const isConfirmed = await Modal.confirm(title, text, 'warning');
+                if (!isConfirmed) return;
+            } else if (!confirm(text.replace(/<[^>]*>/g, ''))) return;
+
+            try {
+                const res = await fetch('/api/user/block', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ targetId: currentPartnerId, action })
+                });
+                
+                if (res.ok) {
+                    openChat(currentPartnerId); 
+                    if (!isBlockedByMe && typeof Modal !== 'undefined') Modal.alert('Готово', 'Пользователь заблокирован', 'success');
+                } else {
+                    if (typeof Modal !== 'undefined') Modal.alert('Ошибка', 'Не удалось выполнить действие', 'error');
+                }
+            } catch (e) { if (typeof Modal !== 'undefined') Modal.alert('Ошибка', 'Сбой сети', 'error'); }
+        }
+
+        function updateBlockUI(status) {
+            const inputArea = document.getElementById('inputArea');
+            const blockedPanel = document.getElementById('blockedPanel');
+            const blockedMsg = document.getElementById('blockedMsg');
+            const unblockBtn = document.getElementById('unblockBtn');
+
+            if (status.iBlockedHim) {
+                isBlockedByMe = true;
+                inputArea.style.display = 'none';
+                blockedPanel.style.display = 'flex';
+                blockedMsg.innerHTML = '<i class="fas fa-user-slash"></i> Вы заблокировали пользователя';
+                unblockBtn.style.display = 'inline-block';
+            } else if (status.heBlockedMe) {
+                isBlockedByMe = false;
+                inputArea.style.display = 'none';
+                blockedPanel.style.display = 'flex';
+                blockedMsg.innerHTML = '<i class="fas fa-hand-paper"></i> Вы в черном списке';
+                unblockBtn.style.display = 'none';
+            } else {
+                isBlockedByMe = false;
+                inputArea.style.display = 'flex';
+                blockedPanel.style.display = 'none';
+            }
+        }
+
+        function handleFileSelect(input) {
+            if (input.files && input.files[0]) {
+                selectedFile = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreviewImg').src = e.target.result;
+                    document.getElementById('imagePreviewBox').style.display = 'block';
+                }
+                reader.readAsDataURL(selectedFile);
+            }
+        }
+
+        function clearImage() {
+            selectedFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('imagePreviewBox').style.display = 'none';
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+            
+            if ((!text && !selectedFile) || !currentPartnerId) return;
+
+            const fileToSend = selectedFile;
+            const textToSend = text;
+            const tempId = Date.now();
+
+            input.value = ''; 
+            clearImage();
+
+            const fakeMsg = {
+                senderId: myId,
+                content: textToSend,
+                imageUrl: fileToSend ? URL.createObjectURL(fileToSend) : null,
+                createdAt: new Date().toISOString(),
+                isRead: false,
+                tempId: tempId 
+            };
+            appendMessage(fakeMsg);
+
+            const formData = new FormData();
+            formData.append('receiverId', currentPartnerId);
+            formData.append('content', textToSend);
+            if (fileToSend) formData.append('image', fileToSend);
+
+            try {
+                const res = await fetch('/api/messages/send', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!data.success) markMessageFailed(tempId);
+                else loadConversations();
+            } catch (e) {
+                markMessageFailed(tempId);
+            }
+        }
+
+        document.getElementById('msgInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function closeChat() {
+            document.getElementById('chatMain').classList.remove('open');
+            currentPartnerId = null;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            document.getElementById('lightboxImg').src = src;
+            lb.classList.add('active');
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

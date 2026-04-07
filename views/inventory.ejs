@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Инвентарь | Дача Зейна' }) %>
+    <link rel="stylesheet" href="/css/inventory.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="inv-wrapper">
+        
+        <header class="inv-header">
+            <div class="inv-title">
+                <h1>🎒 Инвентарь</h1>
+                <span class="inv-count"><%= inventory.length %> предметов</span>
+            </div>
+
+            <nav class="inv-tabs" aria-label="Фильтр инвентаря">
+                <button class="tab-btn active" data-filter="all">Все</button>
+                <button class="tab-btn" data-filter="lootbox">Лутбоксы</button>
+                <button class="tab-btn" data-filter="consumable">Расходники</button>
+                <button class="tab-btn" data-filter="cosmetic">Косметика</button>
+                <button class="tab-btn" data-filter="material">Ресурсы</button>
+            </nav>
+
+            <div class="inv-stats">
+                <div class="inv-stat">
+                    <span>Баланс:</span>
+                    <strong style="color: #ffd700;"><%= Math.floor(profile.stars).toLocaleString() %> ⭐</strong>
+                </div>
+                <a href="/shop" class="btn-secondary" aria-label="Перейти в магазин"><i class="fas fa-shopping-cart"></i> Магазин</a>
+            </div>
+        </header>
+
+        <div class="inv-grid-container">
+            <% if (inventory.length > 0) { %>
+                <div class="inv-grid" id="invGrid">
+                    <% inventory.forEach((slot, index) => { %>
+                        <div class="inv-card <%= slot.rarity %> item-trigger" 
+                             data-index="<%= index %>"
+                             data-category="<%= slot.type %>"
+                             tabindex="0"
+                             role="button"
+                             aria-label="<%= slot.name %>">
+                            
+                            <div class="inv-badge">x<%= slot.amount %></div>
+
+                            <div class="inv-visual">
+                                <% if (slot.imageUrl) { %>
+                                    <img src="<%= slot.imageUrl %>" class="inv-img" alt="<%= slot.name %>" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                    <div class="inv-emoji" style="display: none;" role="img"><%- slot.displayIcon %></div>
+                                <% } else { %>
+                                    <div class="inv-emoji" role="img"><%- slot.displayIcon %></div>
+                                <% } %>
+                            </div>
+                            
+                            <div class="inv-info">
+                                <h3 class="inv-name"><%= slot.name %></h3>
+                                <% 
+                                    const typeMap = { 'material': 'Ресурс', 'lootbox': 'Лутбокс', 'consumable': 'Расходник', 'background': 'Фон', 'frame': 'Рамка', 'role': 'Роль', 'key': 'Ключ' };
+                                %>
+                                <div class="inv-type"><%= typeMap[slot.type] || slot.type %></div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div class="empty-inv">
+                    <div class="empty-icon"><i class="fas fa-box-open"></i></div>
+                    <h3>Пусто...</h3>
+                    <p>Ваш инвентарь пуст.</p>
+                    <a href="/shop" class="btn-primary">Перейти к покупкам</a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <div id="itemModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-labelledby="mName">
+            <button class="close-btn" id="closeItemModal" aria-label="Закрыть"><i class="fas fa-times"></i></button>
+            <div class="modal-visual" id="mVisual"></div>
+            <div class="modal-body">
+                <h2 id="mName">Название</h2>
+                <span class="modal-type" id="mType">Тип</span>
+                <p id="mDesc" class="modal-desc">Описание...</p>
+                <div class="modal-info-row">
+                    <span>В наличии:</span>
+                    <strong id="mQty" style="color: #fff;">x0</strong>
+                </div>
+                <div class="modal-actions" id="mActions"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lootboxModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-content lootbox-content">
+            <h2 class="spin-title">ОТКРЫТИЕ...</h2>
+            <div class="roulette-wrapper">
+                <div class="roulette-pointer"></div>
+                <div class="roulette-window">
+                    <div class="roulette-strip" id="rouletteStrip"></div>
+                </div>
+            </div>
+            <div class="spin-actions">
+                <button class="btn-secondary" id="btnSkip">SKIP >></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rewardModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-content reward-content">
+            <div class="confetti-wrapper"></div>
+            <h2>🎉 Поздравляем!</h2>
+            <p class="reward-subtitle">Вы получили:</p>
+            <div class="rewards-grid" id="rewardsList"></div>
+            <button class="btn-primary big-btn" id="btnCollect">Забрать</button>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>">
+        const inventoryData = <%- JSON.stringify(inventory || []) %>;
+        const typeMap = { 'material': 'Ресурс', 'lootbox': 'Лутбокс', 'consumable': 'Расходник', 'background': 'Фон', 'frame': 'Рамка', 'role': 'Роль', 'key': 'Ключ' };
+        let currentItem = null;
+        let spinTimer = null;
+        let currentRewards = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterInv(btn.dataset.filter);
+                });
+            });
+
+            document.querySelectorAll('.item-trigger').forEach(card => {
+                card.addEventListener('click', () => openItemModal(card.dataset.index));
+            });
+
+            document.querySelectorAll('.close-btn').forEach(btn => {
+                btn.addEventListener('click', closeModal);
+            });
+            
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay && overlay.id !== 'lootboxModal') closeModal();
+                });
+            });
+
+            document.getElementById('btnSkip').addEventListener('click', skipSpin);
+            document.getElementById('btnCollect').addEventListener('click', () => location.reload());
+        });
+
+        function filterInv(category) {
+            const cards = document.querySelectorAll('.inv-card');
+            cards.forEach(card => {
+                const cat = card.getAttribute('data-category');
+                let match = false;
+                
+                if (category === 'all') match = true;
+                else if (category === 'cosmetic' && ['background', 'frame', 'role'].includes(cat)) match = true;
+                else if (category === 'material' && ['material', 'key'].includes(cat)) match = true;
+                else if (cat === category) match = true;
+                
+                card.style.display = match ? 'flex' : 'none';
+            });
+        }
+
+        function openItemModal(index) {
+            const item = inventoryData[index];
+            currentItem = item;
+            
+            document.getElementById('mName').innerText = item.name;
+            document.getElementById('mDesc').innerText = item.description || 'Нет описания';
+            document.getElementById('mType').innerText = typeMap[item.type] || item.type;
+            document.getElementById('mQty').innerText = 'x' + item.amount;
+
+            const visualDiv = document.getElementById('mVisual');
+            if (item.imageUrl) {
+                visualDiv.innerHTML = `<img src="${item.imageUrl}" class="modal-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><div class="modal-emoji" style="display:none">${item.displayIcon}</div>`;
+            } else {
+                visualDiv.innerHTML = `<div class="modal-emoji">${item.displayIcon}</div>`;
+            }
+
+            const actionsDiv = document.getElementById('mActions');
+            actionsDiv.innerHTML = '';
+
+            if (item.isUsable) {
+                const btnLabel = (item.type === 'lootbox') ? 'Открыть' : 'Использовать';
+                const btn = document.createElement('button');
+                btn.className = 'btn-primary full-width';
+                btn.innerText = btnLabel;
+                btn.addEventListener('click', () => useItem(item.itemId, item.name));
+                actionsDiv.appendChild(btn);
+            } else {
+                const info = document.createElement('div');
+                info.className = 'unusable-badge';
+                info.innerText = 'Пассивный предмет / Для крафта';
+                actionsDiv.appendChild(info);
+            }
+
+            document.getElementById('itemModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+        }
+
+        async function useItem(itemId, itemName) {
+            closeModal(); 
+            if (typeof Modal !== 'undefined') {
+                const confirmed = await Modal.confirm("Действие", `Использовать <b>${itemName}</b>?`);
+                if (!confirmed) return;
+            } else if (!confirm(`Использовать ${itemName}?`)) return;
+
+            try {
+                const res = await fetch('/api/inventory/use', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ itemId: itemId, quantity: 1 })
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    if (result.rewards && result.rewards.length > 0) {
+                        currentRewards = result.rewards;
+                        startRoulette(result.rewards[0]);
+                    } else {
+                        if (typeof Modal !== 'undefined') await Modal.alert("Успешно", result.message, "success");
+                        else alert(result.message);
+                        location.reload();
+                    }
+                } else {
+                    if (typeof Modal !== 'undefined') Modal.alert("Ошибка", result.error, "error");
+                    else alert(result.error);
+                }
+            } catch (e) {
+                if (typeof Modal !== 'undefined') Modal.alert("Ошибка", "Сбой сети", "error");
+            }
+        }
+
+        const DUMMY_ITEMS = [
+            { emoji: '🧩', color: 'common' }, { emoji: '💡', color: 'uncommon' },
+            { emoji: '⭐', color: 'rare' }, { emoji: '💎', color: 'epic' },
+            { emoji: '🍀', color: 'rare' }
+        ];
+
+        function startRoulette(winningItem) {
+            const modal = document.getElementById('lootboxModal');
+            const strip = document.getElementById('rouletteStrip');
+            const skipBtn = document.getElementById('btnSkip');
+            
+            modal.classList.add('active');
+            skipBtn.style.display = 'block';
+            
+            strip.innerHTML = '';
+            strip.style.transition = 'none';
+            strip.style.transform = 'translateX(0)';
+            
+            const TOTAL_ITEMS = 50;
+            const WIN_INDEX = 40;
+
+            for (let i = 0; i < TOTAL_ITEMS; i++) {
+                let itemData;
+                if (i === WIN_INDEX) {
+                    itemData = { emoji: winningItem.emoji || '🎁', color: 'legendary' };
+                } else {
+                    itemData = DUMMY_ITEMS[Math.floor(Math.random() * DUMMY_ITEMS.length)];
+                }
+                const card = document.createElement('div');
+                card.className = `roulette-card ${itemData.color}`;
+                card.innerHTML = itemData.emoji;
+                strip.appendChild(card);
+            }
+
+            setTimeout(() => {
+                const CARD_WIDTH = 80 + 10;
+                const targetPos = (WIN_INDEX * CARD_WIDTH) - (document.querySelector('.roulette-window').offsetWidth / 2) + 40;
+
+                strip.style.transition = 'transform 5s cubic-bezier(0.1, 0, 0.1, 1)'; 
+                strip.style.transform = `translateX(-${targetPos}px)`;
+
+                spinTimer = setTimeout(() => { finishSpin(); }, 5000);
+            }, 100);
+        }
+
+        function skipSpin() {
+            if (spinTimer) clearTimeout(spinTimer);
+            finishSpin();
+        }
+
+        function finishSpin() {
+            document.getElementById('lootboxModal').classList.remove('active');
+            showRewards(currentRewards);
+        }
+
+        function showRewards(rewards) {
+            const list = document.getElementById('rewardsList');
+            list.innerHTML = '';
+            rewards.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'reward-card';
+                div.innerHTML = `
+                    <div class="rew-icon">${r.emoji || '🎁'}</div>
+                    <div class="rew-name">${r.name}</div>
+                    <div class="rew-qty">x${r.amount}</div>
+                `;
+                list.appendChild(div);
+            });
+            document.getElementById('rewardModal').classList.add('active');
+        }
+    </script>
+</body>
+</html>

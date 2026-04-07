@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'В разработке | Дача Зейна' }) %>
+    <link rel="stylesheet" href="/css/common.css">
+    
+    <link rel="preload" href="/css/coming-soon.css" as="style">
+    <link rel="stylesheet" href="/css/coming-soon.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <main class="maintenance-container">
+        <div class="maintenance-card" data-aos="fade-up">
+            <div class="icon-box">
+                <i class="fas fa-hammer"></i>
+            </div>
+
+            <h1>
+                <span class="highlight">Скоро</span>
+            </h1>
+
+            <p class="maintenance-desc">
+                Мы готовим контент для страницы <b><%= currentPath %></b>. <br>
+                Совсем скоро этот раздел станет доступен.
+            </p>
+
+            <div class="loading-bar"></div>
+
+            <a href="/" class="btn-back">
+                <i class="fas fa-arrow-left"></i> На главную
+            </a>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>">
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof AOS !== 'undefined') {
+                AOS.init({ once: true, duration: 800 });
+            }
+        });
+    </script>
+</body>
+</html>

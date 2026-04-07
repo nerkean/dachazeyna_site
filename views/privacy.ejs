@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <%- include('partials/head', { title: 'Политика конфиденциальности | Дача Зейна' }) %>
+    <link rel="stylesheet" href="/css/legal.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="legal-page-container">
+        <aside class="legal-sidebar" data-aos="fade-right">
+            <div class="sidebar-title">Навигация</div>
+            <nav class="sidebar-nav">
+                <a href="#collection" class="active"><i class="fas fa-database"></i> 1. Сбор данных</a>
+                <a href="#purpose"><i class="fas fa-bullseye"></i> 2. Цели обработки</a>
+                <a href="#third-party"><i class="fas fa-share-alt"></i> 3. Доступ третьих лиц</a>
+                <a href="#cookies"><i class="fas fa-cookie-bite"></i> 4. Файлы Cookie</a>
+                <a href="#retention"><i class="fas fa-hourglass-half"></i> 5. Срок хранения</a>
+                <a href="#rights"><i class="fas fa-user-slash"></i> 6. Ваши права (GDPR)</a>
+            </nav>
+            
+            <div class="sidebar-contact">
+                <span>Остались вопросы?</span>
+                <a href="https://discord.gg/bandazeyna" target="_blank" class="btn-support">
+                    <i class="fab fa-discord"></i> Поддержка
+                </a>
+            </div>
+        </aside>
+
+        <main class="legal-content" data-aos="fade-up">
+            <div class="legal-header">
+                <div class="doc-badge">Конфиденциальность</div>
+                <h1>Политика <span class="text-gradient">Приватности</span></h1>
+                <p class="last-updated">Последнее обновление: 06.04.2026</p>
+            </div>
+
+            <div class="legal-document">
+                
+                <section id="collection" class="legal-section">
+                    <h2>1. Собираемая информация</h2>
+                    <p>Мы ценим вашу приватность и собираем только те данные, которые критически необходимы для функционирования игровых механик. <strong>Мы никогда не запрашиваем ваше реальное ФИО, номер телефона или email.</strong></p>
+                    
+                    <ul class="styled-list">
+                        <li>
+                            <i class="fab fa-discord"></i>
+                            <div>
+                                <strong>Discord Profile</strong>
+                                Ваш Discord ID, Username и Аватар. Эти данные получаются автоматически и безопасно через публичный API Discord при авторизации.
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-gamepad"></i>
+                            <div>
+                                <strong>Игровой Прогресс</strong>
+                                Баланс валюты (звезды), содержимое инвентаря, история заработка и статистика активности (сообщения/войс) на нашем сервере.
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <strong>Технические Логи</strong>
+                                IP-адрес при входе и User-Agent вашего браузера. Эти данные используются исключительно внутренней системой безопасности для защиты от взлома и мультиаккаунтов.
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="purpose" class="legal-section">
+                    <h2>2. Цели обработки данных</h2>
+                    <p>Мы используем ваши данные строго для поддержания экосистемы проекта:</p>
+                    <ul class="styled-list">
+                        <li>
+                            <i class="fas fa-id-badge"></i>
+                            <div><strong>Идентификация:</strong> Чтобы вы могли безопасно заходить в свой личный кабинет и управлять своим инвентарем.</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-trophy"></i>
+                            <div><strong>Геймификация:</strong> Для работы глобальных рейтингов (Leaderboards), системы уровней и автоматического начисления наград за вашу активность.</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-lock"></i>
+                            <div><strong>Безопасность:</strong> Для предотвращения накрутки валюты, выявления ботоводств и защиты честных игроков.</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-chart-pie"></i>
+                            <div><strong>Аналитика:</strong> Анонимная статистика (например, "Самый покупаемый предмет в магазине") для балансировки экономики сервера.</div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="third-party" class="legal-section">
+                    <h2>3. Доступ третьих лиц</h2>
+                    <div class="highlight-box success-box">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <strong>Гарантия неприкосновенности:</strong> Мы не продаем, не сдаем в аренду и не передаем ваши персональные данные рекламным агентствам, маркетологам или сторонним компаниям.
+                        </div>
+                    </div>
+                    
+                    <p>Ваши данные могут быть доступны только строго ограниченному кругу инфраструктурных партнеров:</p>
+                    <ul class="styled-list">
+                        <li>
+                            <i class="fab fa-discord"></i>
+                            <div><strong>Discord Inc:</strong> Так как вся наша экосистема неразрывно связана с платформой Discord и их API.</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-server"></i>
+                            <div><strong>Хостинг-провайдер:</strong> Для технического и зашифрованного хранения базы данных проекта.</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-user-shield"></i>
+                            <div><strong>Администрация проекта:</strong> Только разработчики и главные администраторы (с полным логированием действий) для решения ваших тикетов и технической поддержки.</div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="cookies" class="legal-section">
+                    <h2>4. Файлы Cookie</h2>
+                    <div class="highlight-box info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            Сайт использует только технические файлы cookie (Session ID). Они нужны <strong>исключительно</strong> для того, чтобы вы оставались авторизованными при переходе между страницами. Мы не используем сторонние рекламные трекеры.
+                        </div>
+                    </div>
+                </section>
+
+                <section id="retention" class="legal-section">
+                    <h2>5. Срок хранения данных</h2>
+                    <p>Ваши данные хранятся ровно до тех пор, пока вы являетесь участником нашего Discord-сообщества или используете наш сайт.</p>
+                    <ul class="styled-list">
+                        <li>
+                            <i class="fas fa-save"></i>
+                            <div>Если вы покинете сервер, ваш игровой профиль (баланс, инвентарь) будет заморожен и сохранен в базе данных. Это делается для того, чтобы вы могли восстановить свой прогресс, если решите вернуться.</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            <div>Технические логи (IP-адреса, история авторизаций) автоматически очищаются и хранятся не более 30 дней.</div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="rights" class="legal-section">
+                    <h2>6. Ваши права (GDPR / Право на забвение)</h2>
+                    <p>Вы являетесь полноправным владельцем своей информации и имеете право в любой момент запросить <strong>полное удаление</strong> всех ваших данных из нашей системы.</p>
+                    
+                    <ul class="styled-list">
+                        <li>
+                            <i class="fas fa-ticket-alt"></i>
+                            <div><strong>Шаг 1:</strong> Создайте тикет в канале <code>#тикеты</code> на нашем Discord сервере.</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-keyboard"></i>
+                            <div><strong>Шаг 2:</strong> Укажите тему обращения: "Удаление данных / GDPR Request".</div>
+                        </li>
+                        <li>
+                            <i class="fas fa-trash-alt"></i>
+                            <div><strong>Шаг 3:</strong> Наш администратор без лишних вопросов удалит ваш профиль, инвентарь и всю статистику в течение 7 дней.</div>
+                        </li>
+                    </ul>
+                    
+                    <p class="text-danger mt-3"><i class="fas fa-exclamation-triangle"></i> <strong>Внимание:</strong> Процедура удаления данных необратима. Весь ваш игровой прогресс, акции и валюта будут утеряны навсегда без возможности восстановления.</p>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script nonce="<%= nonce %>">
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof AOS !== 'undefined') {
+                AOS.init({ once: true, offset: 50, duration: 800 });
+            }
+
+            const sections = document.querySelectorAll('.legal-section');
+            const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (pageYOffset >= (sectionTop - 150)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    window.scrollTo({
+                        top: targetSection.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
