@@ -354,7 +354,10 @@ passport.deserializeUser(async (obj, done) => {
     try {
         const searchId = typeof obj === 'string' ? obj : (obj.id || obj.userId);
         
-        const userProfile = await UserProfile.findOne({ userId: searchId }).lean();
+        const userProfile = await UserProfile.findOne({ 
+            userId: searchId,
+            guildId: process.env.GUILD_ID 
+        }).lean();
         
         if (userProfile) {
             userProfile.id = userProfile.userId;
