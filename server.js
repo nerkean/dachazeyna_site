@@ -157,6 +157,8 @@ app.use((req, res, next) => {
         return next();
     }
 
+    if (req.user) console.log(`[BAN TEST] Path: ${req.path} | User: ${req.user.username} | isBanned: ${req.user.isBanned}`);
+
     if (req.user && req.user.isBanned) {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.setHeader('Pragma', 'no-cache');
