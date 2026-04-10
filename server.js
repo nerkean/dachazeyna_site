@@ -252,8 +252,8 @@ passport.use(new DiscordStrategy({
             return done(null, false, { message: 'ACCOUNT_TOO_NEW' });
         }
 
-        let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        if (ip && ip.includes(',')) ip = ip.split(',')[0].trim();
+        let ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+if (ip && ip.includes(',')) ip = ip.split(',')[0].trim();
 
         if (ip) {
             const bannedUser = await UserProfile.findOne({ 
