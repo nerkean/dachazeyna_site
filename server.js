@@ -77,7 +77,6 @@ app.use(helmet({
                 "https://www.clarity.ms",
                 "https://c.bing.com",
                 "https://*.clarity.ms",
-                "https://telegram.org"
             ],
             workerSrc: ["'self'", "blob:"],
             scriptSrcAttr: ["'unsafe-inline'"],
@@ -100,7 +99,7 @@ app.use(helmet({
             ],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
             connectSrc: ["'self'", "https://dachazeyna.com", "https://cdn.jsdelivr.net", "ws:", "wss:", "https://discord.com", "https://www.google-analytics.com", "https://region1.google-analytics.com", "https://www.googletagmanager.com", "https://www.clarity.ms", "https://c.bing.com", "https://*.clarity.ms", ...googleDomains],
-            frameSrc: ["'self'", "https://www.googletagmanager.com", "https://td.doubleclick.net", "https://oauth.telegram.org"],
+            frameSrc: ["'self'", "https://www.googletagmanager.com", "https://td.doubleclick.net"],
             objectSrc: ["'none'"],
             upgradeInsecureRequests: [],
         },
@@ -154,13 +153,15 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use((req, res, next) => {
-    if (req.path.match(/\.(css|js|png|jpg|jpeg|webp|svg|ico|mp4|webm)$/)) {
+    if (req.path.match(/\.(css|js|png|jpg|jpeg|webp|svg|ico|mp4|webm|woff2)([?#].*)?$/i)) {
         return next();
     }
 
     if (req.user && req.user.isBanned) {
         
-        if (req.path === '/api/appeal' || req.path === '/auth/logout') {
+        const allowedPaths = ['/banned', '/api/appeal', '/auth/logout'];
+        
+        if (allowedPaths.includes(req.path)) {
             return next();
         }
 
@@ -168,9 +169,7 @@ app.use((req, res, next) => {
             return res.status(403).json({ error: 'Ваш аккаунт заблокирован.' });
         }
         
-        if (req.path !== '/banned') {
-            return res.redirect('/banned');
-        }
+        return res.redirect('/banned');
     }
 
     next();
@@ -206,35 +205,6 @@ app.use(async (req, res, next) => {
         res.locals.systemStatus = { online: true, ping: Date.now() - start };
     } catch (e) { res.locals.systemStatus = { online: false, ping: 999 }; }
     next();
-});
-
-app.get('/img/tg-proxy/:fileId', async (req, res) => {
-    try {
-        const fileId = req.params.fileId;
-        const botToken = process.env.BOT_TOKEN; 
-
-        if (!botToken) {
-            return res.status(500).end();
-        }
-
-        const getFileUrl = `https://api.telegram.org/bot${botToken}/getFile?file_id=${fileId}`;
-        const fileData = await fetch(getFileUrl).then(r => r.json());
-
-        if (!fileData.ok) {
-            return res.status(404).end();
-        }
-
-        const fileUrl = `https://api.telegram.org/file/bot${botToken}/${fileData.result.file_path}`;
-        const response = await fetch(fileUrl);
-        
-        res.setHeader('Content-Type', response.headers.get('content-type'));
-        res.setHeader('Cache-Control', 'public, max-age=31536000'); 
-        
-        const arrayBuffer = await response.arrayBuffer();
-        res.send(Buffer.from(arrayBuffer));
-    } catch (e) {
-        res.status(500).end();
-    }
 });
 
 app.use('/auth', authRouter); 
