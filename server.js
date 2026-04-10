@@ -262,10 +262,10 @@ passport.use(new DiscordStrategy({
                 guildId: process.env.GUILD_ID 
             });
 
-            if (bannedUser && ip !== '::1' && ip !== '127.0.0.1') {
-                console.log(`🚫 Вход заблокирован! IP совпадает с забаненным твинком.`);
-                return done(null, false, { message: 'BANNED_ALT' });
-            }
+            if (bannedUser && bannedUser.userId !== profile.id && ip !== '::1' && ip !== '127.0.0.1') {
+    console.log(`🚫 Вход заблокирован! IP совпадает с забаненным твинком.`);
+    return done(null, false, { message: 'BANNED_ALT' });
+}
 
             if (ip !== '::1' && ip !== '127.0.0.1' && !ip.startsWith('192.168.')) {
                 if (ipCache.get(ip) === 'vpn') {
