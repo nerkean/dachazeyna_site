@@ -24,7 +24,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const httpServer = createServer(app);
 
-app.set('trust proxy', 1);
+app.set('trust proxy', true);
 
 const googleDomains = [
     "https://www.google.com",
@@ -158,9 +158,11 @@ app.use((req, res, next) => {
     }
 
     if (req.user && req.user.isBanned) {
-        
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+
         const allowedPaths = ['/banned', '/api/appeal', '/auth/logout'];
-        
         if (allowedPaths.includes(req.path)) {
             return next();
         }
