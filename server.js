@@ -143,7 +143,7 @@ const sessionMiddleware = session({
     cookie: { 
         maxAge: 1000 * 60 * 60 * 24 * 30,
         httpOnly: true,
-        secure: isProduction, 
+        secure: false, 
         sameSite: isProduction ? 'none' : 'lax'
     }
 });
