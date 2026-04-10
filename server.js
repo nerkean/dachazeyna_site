@@ -143,7 +143,7 @@ const sessionMiddleware = session({
     cookie: { 
         maxAge: 1000 * 60 * 60 * 24 * 30,
         httpOnly: true,
-        secure: false, 
+        secure: isProduction, 
         sameSite: isProduction ? 'none' : 'lax'
     }
 });
@@ -262,7 +262,7 @@ passport.use(new DiscordStrategy({
                 guildId: process.env.GUILD_ID 
             });
 
-            if (bannedUser && bannedUser.userId !== profile.id && ip !== '::1' && ip !== '127.0.0.1') {
+                       if (bannedUser && bannedUser.userId !== profile.id && ip !== '::1' && ip !== '127.0.0.1') {
     console.log(`🚫 Вход заблокирован! IP совпадает с забаненным твинком.`);
     return done(null, false, { message: 'BANNED_ALT' });
 }
