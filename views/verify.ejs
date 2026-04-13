@@ -56,28 +56,48 @@
                 </span>
             </label>
 
-            <button id="loginBtn" class="btn-discord" disabled onclick="window.location.href='/auth/discord'">
-                <i class="fa-brands fa-discord"></i> Авторизоваться
-            </button>
+            <button id="loginBtn" class="btn-discord" disabled>
+    <i class="fa-brands fa-discord"></i> Авторизоваться
+</button>
         </div>
     </main>
 
     <%- include('partials/footer') %>
 
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+
     <script nonce="<%= nonce %>">
         document.addEventListener("DOMContentLoaded", () => {
             if (window.Modal) window.Modal.init();
 
-            const checkbox = document.getElementById('termsCheckbox');
-            const loginBtn = document.getElementById('loginBtn');
+            const fpPromise = FingerprintJS.load();
 
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    loginBtn.removeAttribute('disabled');
-                } else {
-                    loginBtn.setAttribute('disabled', 'true');
-                }
-            });
+        const checkbox = document.getElementById('termsCheckbox');
+        const loginBtn = document.getElementById('loginBtn');
+
+        checkbox.addEventListener('change', function() {
+            loginBtn.disabled = !this.checked;
+        });
+
+        loginBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const fp = await fpPromise;
+            const result = await fp.get();
+            const visitorId = result.visitorId;
+
+            try {
+                await fetch('/auth/set-fingerprint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fingerprint: visitorId })
+                });
+                window.location.href = '/auth/discord';
+            } catch (err) {
+                console.error('Fp error:', err);
+                window.location.href = '/auth/discord';
+            }
+        });
 
             const urlParams = new URLSearchParams(window.location.search);
             const error = urlParams.get('error');

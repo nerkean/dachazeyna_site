@@ -1,198 +1,74 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <%- include('partials/head', { title: 'Топ Игроков | Дача Зейна' }) %>
+    <%- include('partials/head', { title: 'Зал Славы | Дача Зейна' }) %>
     <link rel="preload" href="/css/leaderboard.css" as="style">
     <link rel="stylesheet" href="/css/leaderboard.css">
-    <link rel="preload" href="/assets/fonts/web/jetbrains-mono-v24-cyrillic_latin-700.woff2" as="font" type="font/woff2" crossorigin>
 </head>
 <body>
     <%- include('partials/navbar') %>
 
-    <div class="lb-wrapper">
-        <header class="lb-header" data-aos="fade-down">
-            <h1>Зал славы</h1>
-            <p>Лучшие из лучших. Элита улья.</p>
-            
-            <div class="filters-container">
-                <div class="filter-tabs">
-                    <a href="/leaderboard?sort=stars" class="tab-btn <%= sortType === 'stars' ? 'active' : '' %>" aria-label="Сортировка по капиталу">
-                        <i class="fas fa-coins" aria-hidden="true"></i> <span class="tab-text">Капитал</span>
-                    </a>
-                    <a href="/leaderboard?sort=messages&period=<%= period %>" class="tab-btn <%= sortType === 'messages' ? 'active' : '' %>" aria-label="Сортировка по общению">
-                        <i class="fas fa-comment-alt" aria-hidden="true"></i> <span class="tab-text">Общение</span>
-                    </a>
-                    <a href="/leaderboard?sort=voice&period=<%= period %>" class="tab-btn <%= sortType === 'voice' ? 'active' : '' %>" aria-label="Сортировка по голосовому активу">
-                        <i class="fas fa-microphone-alt" aria-hidden="true"></i> <span class="tab-text">Войс</span>
-                    </a>
-                    <a href="/leaderboard?sort=rep" class="tab-btn <%= sortType === 'rep' ? 'active' : '' %>" aria-label="Сортировка по репутации">
-                        <i class="fas fa-crown" aria-hidden="true"></i> <span class="tab-text">Репутация</span>
-                    </a>
+    <main class="lb-page">
+        <div class="lb-bg-grid"></div>
+        <div class="lb-glow"></div>
+
+        <section class="lb-container lb-fade-in">
+            <div class="lb-header">
+                <div class="lb-season-badge">
+                    <span class="live-dot"></span> Сезон 1
+                </div>
+                <h1 class="lb-title">Зал Славы</h1>
+                <p class="lb-subtitle">Выбирай категорию, находи себя в топе и соревнуйся с лучшими!</p>
+            </div>
+
+            <div class="lb-tabs">
+                <button class="lb-tab active" data-sort="stars"><i class="fas fa-coins"></i> Топ богачей</button>
+                <button class="lb-tab" data-sort="messages"><i class="fas fa-comment-dots"></i> Топ писателей</button>
+                <button class="lb-tab" data-sort="voice"><i class="fas fa-microphone"></i> Топ говорунов</button>
+            </div>
+
+            <div class="lb-periods" id="lb-periods" style="display: none;">
+                <button class="lb-period-btn active" data-period="all">Всё время</button>
+                <button class="lb-period-btn" data-period="30d">30 дней</button>
+                <button class="lb-period-btn" data-period="7d">7 дней</button>
+                <button class="lb-period-btn" data-period="1d">24 часа</button>
+            </div>
+
+            <div class="lb-podium" id="lb-podium"></div>
+
+            <div class="lb-board">
+                <div class="lb-controls">
+                    <div class="lb-status"><i class="fas fa-sync-alt fa-spin"></i> Загрузка...</div>
+                    <div class="lb-search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="lb-search" placeholder="Глобальный поиск по серверу...">
+                    </div>
                 </div>
 
-                <% if (sortType === 'messages' || sortType === 'voice') { %>
-                    <div class="time-selector">
-                        <a href="/leaderboard?sort=<%= sortType %>&period=1d" class="<%= period === '1d' ? 'selected' : '' %>" aria-label="За 24 часа">24Ч</a>
-                        <a href="/leaderboard?sort=<%= sortType %>&period=7d" class="<%= period === '7d' ? 'selected' : '' %>" aria-label="За 7 дней">7Д</a>
-                        <a href="/leaderboard?sort=<%= sortType %>&period=30d" class="<%= period === '30d' ? 'selected' : '' %>" aria-label="За 30 дней">30Д</a>
-                        <a href="/leaderboard?sort=<%= sortType %>&period=all" class="<%= period === 'all' ? 'selected' : '' %>" aria-label="За все время">ВСЕ</a>
-                    </div>
-                <% } %>
-            </div>
-        </header>
-
-        <h2 class="visually-hidden">Список лидеров</h2>
-
-        <% if (leaders.length > 0 && currentPage === 1) { %>
-            <div class="podium-stage">
-                <% if (leaders[1]) { %>
-                    <div class="podium-column silver" onclick="window.location.href='/profile/<%= leaders[1].userId %>'" data-aos="fade-up" data-aos-delay="100">
-                        <div class="avatar-box">
-                            <% if (leaders[1].avatar) { %>
-                                <img src="https://cdn.discordapp.com/avatars/<%= leaders[1].userId %>/<%= leaders[1].avatar %>.webp?size=128" 
-                                     alt="Аватар игрока <%= leaders[1].username %>" width="80" height="80" loading="eager" crossorigin="anonymous">
-                            <% } else { %>
-                                <img src="assets/img/avatars/default_avatar.png" alt="Стандартный аватар" width="80" height="80" loading="eager">
-                            <% } %>
-                            <div class="rank-badge">2</div>
-                        </div>
-                        <div class="u-name"><%= leaders[1].username %></div>
-                        <div class="u-val">
-                            <%= sortType === 'voice' ? formatVoice(leaders[1][dbField]) : leaders[1][dbField].toLocaleString() %>
-                            <small><%= valueSuffix %></small>
-                        </div>
-                        <div class="pillar"></div>
-                    </div>
-                <% } %>
-
-                <% if (leaders[0]) { %>
-                    <div class="podium-column gold" onclick="window.location.href='/profile/<%= leaders[0].userId %>'" data-aos="zoom-in">
-                        <div class="crown-float"><i class="fas fa-crown" aria-hidden="true"></i></div>
-                        <div class="avatar-box">
-                            <% if (leaders[0].avatar) { %>
-                                <img src="https://cdn.discordapp.com/avatars/<%= leaders[0].userId %>/<%= leaders[0].avatar %>.webp?size=128" 
-                                     alt="Аватар лидера <%= leaders[0].username %>" width="100" height="100" loading="eager" fetchpriority="high" crossorigin="anonymous">
-                            <% } else { %>
-                                <img src="assets/img/avatars/default_avatar.png" alt="Стандартный аватар" width="100" height="100" loading="eager" fetchpriority="high">
-                            <% } %>
-                            <div class="rank-badge">1</div>
-                        </div>
-                        <div class="u-name"><%= leaders[0].username %></div>
-                        <div class="u-val">
-                            <%= sortType === 'voice' ? formatVoice(leaders[0][dbField]) : leaders[0][dbField].toLocaleString() %>
-                            <small><%= valueSuffix %></small>
-                        </div>
-                        <div class="pillar"></div>
-                    </div>
-                <% } %>
-
-                <% if (leaders[2]) { %>
-                    <div class="podium-column bronze" onclick="window.location.href='/profile/<%= leaders[2].userId %>'" data-aos="fade-up" data-aos-delay="200">
-                        <div class="avatar-box">
-                            <% if (leaders[2].avatar) { %>
-                                <img src="https://cdn.discordapp.com/avatars/<%= leaders[2].userId %>/<%= leaders[2].avatar %>.webp?size=128" 
-                                     alt="Аватар игрока <%= leaders[2].username %>" width="80" height="80" loading="lazy" crossorigin="anonymous">
-                            <% } else { %>
-                                <img src="assets/img/avatars/default_avatar.png" alt="Стандартный аватар" width="80" height="80" loading="lazy">
-                            <% } %>
-                            <div class="rank-badge">3</div>
-                        </div>
-                        <div class="u-name"><%= leaders[2].username %></div>
-                        <div class="u-val">
-                            <%= sortType === 'voice' ? formatVoice(leaders[2][dbField]) : leaders[2][dbField].toLocaleString() %>
-                            <small><%= valueSuffix %></small>
-                        </div>
-                        <div class="pillar"></div>
-                    </div>
-                <% } %>
-            </div>
-        <% } %>
-
-        <div class="lb-list">
-            <% if (leaders.length > 0) { %>
-                <% leaders.forEach((player, index) => { %>
-                    <% 
-                        const rank = startRank + index; 
-                        if (currentPage === 1 && rank <= 3) return;
-                    %>
-                    
-                    <div class="lb-card <%= (user && user.id === player.userId) ? 'me' : '' %>" 
-                         onclick="window.location.href='/profile/<%= player.userId %>'"
-                         data-aos="fade-up" data-aos-offset="30">
-                        
-                        <div class="lb-rank">#<%= rank %></div>
-                        
-                        <div class="lb-user">
-                            <% if (player.avatar) { %>
-                                <img src="https://cdn.discordapp.com/avatars/<%= player.userId %>/<%= player.avatar %>.webp?size=64" 
-                                     alt="Аватар <%= player.username %>" width="40" height="40" loading="lazy" crossorigin="anonymous">
-                            <% } else { %>
-                                <img src="assets/img/avatars/default_avatar.png" alt="Стандартный аватар" width="40" height="40" loading="lazy">
-                            <% } %>
-                            
-                            <div class="lb-info">
-                                <span class="name"><%= player.username %></span>
-                                <% if (player.activeTitle) { %>
-                                    <span class="title"><%= player.activeTitle %></span>
-                                <% } %>
-                            </div>
-                        </div>
-
-                        <div class="lb-stat">
-                            <% 
-                                let val = player[dbField];
-                                if (sortType === 'voice') val = formatVoice(val);
-                                else if (sortType === 'stars') val = val.toLocaleString();
-                            %>
-                            <strong><%= val %></strong> <span><%= valueSuffix %></span>
-                        </div>
-                    </div>
-                <% }) %>
-
-                <% if (totalPages > 1) { %>
-                    <div class="pagination">
-                        <% if (currentPage > 1) { %>
-                            <a href="?sort=<%= sortType %>&period=<%= period %>&page=1" class="page-btn" aria-label="В начало"><i class="fas fa-angle-double-left" aria-hidden="true"></i></a>
-                            <a href="?sort=<%= sortType %>&period=<%= period %>&page=<%= currentPage - 1 %>" class="page-btn" aria-label="Предыдущая страница"><i class="fas fa-chevron-left" aria-hidden="true"></i></a>
-                        <% } %>
-
-                        <div class="page-numbers">
-                            <span><%= currentPage %> / <%= totalPages %></span>
-                        </div>
-
-                        <% if (currentPage < totalPages) { %>
-                            <a href="?sort=<%= sortType %>&period=<%= period %>&page=<%= currentPage + 1 %>" class="page-btn" aria-label="Следующая страница"><i class="fas fa-chevron-right" aria-hidden="true"></i></a>
-                            <a href="?sort=<%= sortType %>&period=<%= period %>&page=<%= totalPages %>" class="page-btn" aria-label="В конец"><i class="fas fa-angle-double-right" aria-hidden="true"></i></a>
-                        <% } %>
-                    </div>
-                <% } %>
-
-            <% } else { %>
-                <div class="empty-state">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                    <p>Данных пока нет. Стань первым!</p>
+                <div class="lb-list-header">
+                    <div class="col-rank">Место</div>
+                    <div class="col-user">Пчеловод</div>
+                    <div class="col-value" id="col-value-title">Капитал</div>
                 </div>
-            <% } %>
-        </div>
-    </div>
 
-    <% if (user && myRank) { %>
-        <div class="my-rank-bar" onclick="window.location.href='/profile/<%= user.id %>'">
-            <div class="mrb-content">
-                <div class="mrb-rank">Вы: <span>#<%= myRank %></span></div>
-                <div class="mrb-val">
-                    <%= myValue %> <small><%= valueSuffix %></small>
+                <div class="lb-list-body" id="lb-table-body"></div>
+                
+                <div class="lb-pagination">
+                    <button id="btn-prev" class="lb-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                    <div class="lb-page-jump">
+                        <span>Стр.</span>
+                        <input type="number" id="page-input" value="1" min="1">
+                        <span id="page-total">из 1</span>
+                    </div>
+                    <button id="btn-next" class="lb-btn" disabled><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
-        </div>
-    <% } %>
+        </section>
+    </main>
 
     <%- include('partials/footer') %>
-    
-    <script nonce="<%= nonce %>">
-        document.addEventListener('DOMContentLoaded', () => {
-            if(typeof AOS !== 'undefined') AOS.init();
-        });
-    </script>
+
+    <script src="/libs/aos.js" defer></script> 
+    <script src="/js/leaderboard.js" defer nonce="<%= locals.nonce %>"></script>
 </body>
 </html>

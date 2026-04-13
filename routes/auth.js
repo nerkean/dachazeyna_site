@@ -4,6 +4,18 @@ import UserProfile from '../src/models/UserProfile.js';
 
 const router = express.Router();
 
+router.post('/set-fingerprint', express.json(), (req, res) => {
+    if (req.body.fingerprint) {
+        req.session.lastFingerprint = req.body.fingerprint;
+        req.session.save((err) => {
+            if (err) return res.status(500).json({ success: false });
+            res.json({ success: true });
+        });
+    } else {
+        res.status(400).json({ success: false });
+    }
+});
+
 router.get('/discord', passport.authenticate('discord'));
 
 router.get('/discord/callback', (req, res, next) => {

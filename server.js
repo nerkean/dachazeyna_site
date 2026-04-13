@@ -156,9 +156,7 @@ app.use((req, res, next) => {
     if (req.path.match(/\.(css|js|png|jpg|jpeg|webp|svg|ico|mp4|webm|woff2)([?#].*)?$/i)) {
         return next();
     }
-
-    if (req.user) console.log(`[BAN TEST] Path: ${req.path} | User: ${req.user.username} | isBanned: ${req.user.isBanned}`);
-
+    
     if (req.user && req.user.isBanned) {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.setHeader('Pragma', 'no-cache');
@@ -242,10 +240,13 @@ passport.use(new DiscordStrategy({
     }
 }, async (req, accessToken, refreshToken, profile, done) => {
     try {
+        const fingerprint = req.session.lastFingerprint;
+        let ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        if (ip && ip.includes(',')) ip = ip.split(',')[0].trim();
+
         const DISCORD_EPOCH = 1420070400000n;
         const userIdBigInt = BigInt(profile.id);
         const creationTimestamp = Number((userIdBigInt >> 22n) + DISCORD_EPOCH);
-        
         const accountAgeMs = Date.now() - creationTimestamp;
         const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
 
@@ -254,20 +255,28 @@ passport.use(new DiscordStrategy({
             return done(null, false, { message: 'ACCOUNT_TOO_NEW' });
         }
 
-        let ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-if (ip && ip.includes(',')) ip = ip.split(',')[0].trim();
+        if (fingerprint) {
+            const bannedByFp = await UserProfile.findOne({
+                fingerprints: fingerprint,
+                isBanned: true
+            });
+            
+            if (bannedByFp) {
+                console.log(`🚫 Твинк обнаружен по железу (${profile.username})`);
+                return done(null, false, { message: 'BANNED_ALT' });
+            }
+        }
 
         if (ip) {
-            const bannedUser = await UserProfile.findOne({ 
+            const bannedUserByIp = await UserProfile.findOne({ 
                 ips: ip, 
                 isBanned: true,
                 guildId: process.env.GUILD_ID 
             });
 
-                       if (bannedUser && bannedUser.userId !== profile.id && ip !== '::1' && ip !== '127.0.0.1') {
-    console.log(`🚫 Вход заблокирован! IP совпадает с забаненным твинком.`);
-    return done(null, false, { message: 'BANNED_ALT' });
-}
+            if (bannedUserByIp && bannedUserByIp.userId !== profile.id) {
+                console.log(`⚠️ Пользователь ${profile.username} зашел с IP забаненного участника, но с другим железом`);
+            }
 
             if (ip !== '::1' && ip !== '127.0.0.1' && !ip.startsWith('192.168.')) {
                 if (ipCache.get(ip) === 'vpn') {
@@ -282,43 +291,50 @@ if (ip && ip.includes(',')) ip = ip.split(',')[0].trim();
                         if (vpnData.status === 'success') {
                             if (vpnData.proxy || vpnData.hosting) {
                                 ipCache.set(ip, 'vpn');
-                                console.log(`🚫 Вход заблокирован! Обнаружен VPN/Proxy.`);
+                                console.log(`🚫 Вход заблокирован! Обнаружен VPN/Proxy`);
                                 return done(null, false, { message: 'VPN_DETECTED' });
                             } else {
                                 ipCache.set(ip, 'clean');
                             }
                         }
                     } catch (vpnErr) {
-                        console.error('⚠️ Ошибка API VPN (возможно лимит), пропускаем проверку:', vpnErr.message);
+                        console.error('⚠️ Ошибка API VPN, пропускаем проверку:', vpnErr.message);
                     }
                 }
             }
         }
 
         const existingUser = await UserProfile.findOne({ 
-    userId: profile.id, 
-    guildId: process.env.GUILD_ID 
-});
+            userId: profile.id, 
+            guildId: process.env.GUILD_ID 
+        });
 
-const isNewVerification = !existingUser || !existingUser.isVerified;
+        const isNewVerification = !existingUser || !existingUser.isVerified;
 
-const updateData = {
-    username: profile.username,
-    avatar: profile.avatar,
-    isVerified: true,
-    $addToSet: { ips: ip },
-    $setOnInsert: { 
-        stars: 100, 
-        joinedAt: new Date(),
-        firstLoginAt: new Date()
-    }
-};
+        const updateData = {
+            username: profile.username,
+            avatar: profile.avatar,
+            isVerified: true,
+            $addToSet: {},
+            $setOnInsert: { 
+                stars: 100, 
+                joinedAt: new Date(),
+                firstLoginAt: new Date()
+            }
+        };
 
-const user = await UserProfile.findOneAndUpdate(
-    { userId: profile.id, guildId: process.env.GUILD_ID },
-    updateData,
-    { upsert: true, new: true, setDefaultsOnInsert: true }
-);
+        if (ip) updateData.$addToSet.ips = ip;
+        if (fingerprint) updateData.$addToSet.fingerprints = fingerprint;
+
+        if (Object.keys(updateData.$addToSet).length === 0) {
+            delete updateData.$addToSet;
+        }
+
+        const user = await UserProfile.findOneAndUpdate(
+            { userId: profile.id, guildId: process.env.GUILD_ID },
+            updateData,
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
 
         if (process.env.VERIFIED_ROLE_ID && process.env.DISCORD_BOT_TOKEN) {
             try {
@@ -342,22 +358,22 @@ const user = await UserProfile.findOneAndUpdate(
             }
         }
 
-        return done(null, { ...profile, isNewVerification });
+        return done(null, { ...user.toObject(), isNewVerification });
     } catch (err) { 
+        console.error("Ошибка в DiscordStrategy:", err);
         return done(err, null); 
     }
 }));
 
 passport.serializeUser((user, done) => {
-    done(null, user.id || user.userId); 
+    const idToSave = user.userId || user.id;
+    done(null, idToSave); 
 });
 
-passport.deserializeUser(async (obj, done) => {
+passport.deserializeUser(async (id, done) => {
     try {
-        const searchId = typeof obj === 'string' ? obj : (obj.id || obj.userId);
-        
         const userProfile = await UserProfile.findOne({ 
-            userId: searchId,
+            userId: id,
             guildId: process.env.GUILD_ID 
         }).lean();
         
@@ -365,10 +381,11 @@ passport.deserializeUser(async (obj, done) => {
             userProfile.id = userProfile.userId;
             return done(null, userProfile);
         } else {
+            console.log(`⚠️ Не удалось найти пользователя в базе при десериализации (ID: ${id})`);
             return done(null, false); 
         }
     } catch (err) { 
-        console.error("Ошибка при десериализации:", err);
+        console.error("❌ Ошибка при десериализации:", err);
         return done(err, null); 
     }
 });

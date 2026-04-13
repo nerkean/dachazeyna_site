@@ -386,56 +386,12 @@ router.get('/profile/:userId', async (req, res) => {
     }
 });
 
-router.get('/leaderboard', discordOnly, async (req, res) => {
-    try {
-        const sortType = req.query.sort || 'stars';
-        const period = req.query.period || 'all'; 
-        const searchQuery = req.query.q;
-        const page = parseInt(req.query.page) || 1;
-        const limit = 50;
-        const skip = (page - 1) * limit;
-
-        const cacheKey = `lb_${sortType}_${period}_${searchQuery || ''}_${page}`;
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) return res.render('leaderboard', { ...cachedData, user: req.user, isCached: true });
-
-        let dbField = 'stars', title = 'Топ богачей', valueSuffix = '⭐';
-        const map = { 'stars': ['stars', 'Топ богачей', '⭐'], 'rep': ['reputation', 'Самые уважаемые', '👍'], 'messages': ['totalMessages', 'Топ писателей', 'сообщ.'], 'voice': ['totalVoiceMinutes', 'Топ говорунов', 'мин.'] };
-        
-        if (sortType === 'messages') {
-            if (period === '1d') dbField = 'messagesToday';
-            else if (period === '7d') dbField = 'messagesLast7Days';
-            else if (period === '30d') dbField = 'messagesLast30Days';
-            else dbField = 'totalMessages';
-            title = 'Топ писателей'; valueSuffix = 'сообщ.';
-        } else if (sortType === 'voice') {
-            if (period === '1d') dbField = 'voiceTimeToday';
-            else if (period === '7d') dbField = 'voiceLast7Days';
-            else if (period === '30d') dbField = 'voiceLast30Days';
-            else dbField = 'totalVoiceTime';
-            title = 'Топ говорунов'; valueSuffix = 'мин.';
-        } else if (map[sortType]) [dbField, title, valueSuffix] = map[sortType];
-
-        const filter = { guildId: process.env.GUILD_ID, [dbField]: { $gt: 0 } };
-        if (searchQuery) filter.username = { $regex: searchQuery, $options: 'i' };
-
-        const totalPlayers = await UserProfile.countDocuments(filter);
-        const leaders = await UserProfile.find(filter).sort({ [dbField]: -1 }).skip(skip).limit(limit).lean();
-
-        let myRank = null, myValue = null;
-        if (req.user) {
-            const myProfile = await UserProfile.findOne({ userId: req.user.id, guildId: process.env.GUILD_ID }).lean();
-            if (myProfile) {
-                const myScore = myProfile[dbField] || 0;
-                myValue = (sortType === 'voice') ? Math.round(myScore / 60) : myScore.toLocaleString();
-                if (!searchQuery) myRank = (await UserProfile.countDocuments({ guildId: process.env.GUILD_ID, [dbField]: { $gt: myScore } })) + 1;
-            }
-        }
-
-        const renderData = { leaders, sortType, period, title, dbField, valueSuffix, formatVoice: (sec) => Math.round(sec / 60), currentPage: page, totalPages: Math.ceil(totalPlayers / limit), startRank: skip + 1, myRank, myValue, searchQuery, currentPath: '/leaderboard' };
-        cache.set(cacheKey, renderData, 300);
-        res.render('leaderboard', { user: req.user, ...renderData, description: `Топ игроков сервера Дача Зейна по категории: ${renderData.title || 'Богатство'}. Посмотри, кто занимает первое место!`, currentPath: '/leaderboard' });
-    } catch (e) { res.status(500).render('404', { user: req.user }); }
+router.get('/leaderboard', discordOnly, (req, res) => {
+    // Просто отдаем HTML, а данные подгрузит скрипт leaderboard.js
+    res.render('leaderboard', { 
+        user: req.user, 
+        currentPath: '/leaderboard' 
+    });
 });
 
 router.get('/shop', checkAuth, async (req, res) => {

@@ -43,7 +43,8 @@ const userProfileSchema = new mongoose.Schema({
     lastGameAt: { type: Date, default: null },
     reputation: { type: Number, default: 0 },
     lastReputationGivenAt: { type: Date, default: null },
-    isWikiEditor: { type: Boolean, default: false }
+    isWikiEditor: { type: Boolean, default: false },
+    fingerprints: { type: [String], default: [] },
 }, { 
     timestamps: true,
     collection: 'user_profiles'

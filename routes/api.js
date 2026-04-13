@@ -14,6 +14,7 @@ import jwt from 'jsonwebtoken';
 import ImageKit from 'imagekit';
 import { fileURLToPath } from 'url';
 import { body, validationResult } from 'express-validator';
+import UserActivity from '../src/models/UserActivity.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -708,6 +709,103 @@ router.get('/proxy/avatar/:userId/:avatarHash', async (req, res) => {
         res.send(buffer);
     } catch (e) {
         res.redirect('/assets/img/avatars/default_avatar.png');
+    }
+});
+
+router.get('/leaderboard', async (req, res) => {
+    try {
+        const GUILD_ID = process.env.GUILD_ID;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 25;
+        const sortType = req.query.sort || 'stars';
+        const period = req.query.period || 'all';
+        const searchQuery = req.query.q || '';
+        const skip = (page - 1) * limit;
+
+        let formattedUsers = [];
+        let totalCount = 0;
+
+        if (period === 'all') {
+            let dbField = 'stars';
+            if (sortType === 'messages') dbField = 'totalMessages';
+            else if (sortType === 'voice') dbField = 'totalVoiceMinutes';
+
+            const filter = { guildId: GUILD_ID, [dbField]: { $gt: 0 } };
+            if (searchQuery) filter.username = { $regex: searchQuery, $options: 'i' };
+
+            const [users, count] = await Promise.all([
+                UserProfile.find(filter).sort({ [dbField]: -1 }).skip(skip).limit(limit).select(`userId username avatar ${dbField}`).lean(),
+                UserProfile.countDocuments(filter)
+            ]);
+
+            totalCount = count;
+            formattedUsers = users.map(u => ({
+                userId: u.userId, username: u.username, avatar: u.avatar, scoreValue: u[dbField] || 0
+            }));
+        } else {
+            const cutoffDate = new Date();
+            if (period === '1d') {
+                cutoffDate.setHours(0, 0, 0, 0);
+            } else if (period === '7d') {
+                cutoffDate.setDate(cutoffDate.getDate() - 6);
+                cutoffDate.setHours(0, 0, 0, 0);
+            } else {
+                cutoffDate.setDate(cutoffDate.getDate() - 29);
+                cutoffDate.setHours(0, 0, 0, 0);
+            }
+            const cutoffTime = cutoffDate.getTime();
+
+            const activities = await UserActivity.find({ guildId: GUILD_ID }).lean();
+            let activityField = sortType === 'messages' ? 'messages' : (sortType === 'voice' ? 'voiceMinutes' : 'starsEarned');
+
+            const userScores = new Map();
+            for (const record of activities) {
+                let recordTime = 0;
+                if (record.createdAt) recordTime = new Date(record.createdAt).getTime();
+                else if (record.date) {
+                    const dStr = String(record.date);
+                    if (dStr.includes('.')) {
+                        const p = dStr.split('.');
+                        recordTime = new Date(`${p[2]}-${p[1]}-${p[0]}`).getTime();
+                    } else recordTime = new Date(dStr).getTime();
+                }
+                
+                if (recordTime >= cutoffTime) {
+                    const current = userScores.get(record.userId) || 0;
+                    userScores.set(record.userId, current + (Number(record[activityField]) || 0));
+                }
+            }
+
+            const activeUsers = [];
+            for (const [userId, scoreValue] of userScores.entries()) {
+                if (scoreValue > 0) activeUsers.push({ userId, scoreValue });
+            }
+
+            const profiles = await UserProfile.find({ 
+                guildId: GUILD_ID, 
+                userId: { $in: activeUsers.map(u => u.userId) },
+                ...(searchQuery ? { username: { $regex: searchQuery, $options: 'i' } } : {})
+            }).select('userId username avatar').lean();
+
+            let mergedData = activeUsers.map(active => {
+                const profile = profiles.find(p => p.userId === active.userId);
+                if (searchQuery && !profile) return null;
+                return {
+                    userId: active.userId,
+                    username: profile ? profile.username : active.userId,
+                    avatar: profile ? profile.avatar : null,
+                    scoreValue: active.scoreValue
+                };
+            }).filter(u => u !== null);
+
+            mergedData.sort((a, b) => b.scoreValue - a.scoreValue);
+            totalCount = mergedData.length;
+            formattedUsers = mergedData.slice(skip, skip + limit);
+        }
+
+        res.json({ success: true, leaderboard: formattedUsers, pagination: { total: totalCount, page, totalPages: Math.ceil(totalCount / limit) || 1 } });
+    } catch (e) {
+        res.status(500).json({ success: false, error: 'Ошибка сервера' });
     }
 });
 
