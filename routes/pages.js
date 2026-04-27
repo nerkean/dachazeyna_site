@@ -3,7 +3,6 @@ import UserProfile from '../src/models/UserProfile.js';
 import Article from '../src/models/Article.js';
 import BanAppeal from '../src/models/BanAppeal.js';
 import { checkAuth } from '../middleware/checkAuth.js';
-// import { getShopItems, getItemDefinition } from '../src/utils/definitions/itemDefinitions.js';
 import Notification from '../src/models/Notification.js';
 import { checkWikiAccess } from '../middleware/checkWikiAccess.js';
 import Giveaway from '../src/models/Giveaway.js'
@@ -12,6 +11,9 @@ import { checkMaintenance } from '../middleware/maintenance.js';
 import Marriage from '../src/models/Marriage.js';
 import UserActivity from '../src/models/UserActivity.js';
 import { ITEMS, getItemDefinition } from '../src/utils/definitions/itemDefinitions.js';
+import SystemStatus from '../src/models/SystemStatus.js';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
 
@@ -117,7 +119,18 @@ router.get('/', async (req, res) => {
                 { $match: { guildId: process.env.GUILD_ID } },
                 { $group: { _id: null, totalStars: { $sum: "$stars" } } }
             ]);
-            dbStats = { users: totalUsers, stars: economyStats[0]?.totalStars || 0 };
+
+            const topUsers = await UserProfile.find({ guildId: process.env.GUILD_ID })
+                .sort({ totalMessages: -1, stars: -1 }) 
+                .limit(5)
+                .select('userId username avatar stars level totalMessages')
+                .lean();
+
+            dbStats = { 
+                users: totalUsers, 
+                stars: economyStats[0]?.totalStars || 0,
+                topUsers: topUsers 
+            };
             cache.set(statsCacheKey, dbStats, 300);
         }
         
@@ -134,8 +147,9 @@ router.get('/', async (req, res) => {
                 users: dbStats.users,
                 stars: dbStats.stars
             },
+            topUsers: dbStats.topUsers,
             title: 'Дача Зейна | Сообщество Bee Swarm Simulator в Roblox',
-            description: 'Дача Зейна — крупнейшее русскоязычное сообщество по BSS. Уникальный бот, биржа акций, гайды по пчелам и регулярные розыгрыши Robux.',
+            description: 'Дача Зейна — крупнейшее русскоязычное сообщество по BSS. Уникальный бот, своя экономика, гайды по пчелам и регулярные розыгрыши. Присоединяйся к нам в Discord и развивайся вместе с нами!',
             myProfile, 
             currentPath: '/', 
             jsonLD
@@ -237,9 +251,7 @@ router.get('/wiki/:slug', async (req, res) => {
 
         if (shouldCount) {
             await Article.findByIdAndUpdate(article._id, { $inc: { views: 1 } });
-            
             req.session.viewedArticles.push(articleIdStr);
-            
             article.views += 1;
         }
 
@@ -351,7 +363,6 @@ router.get('/profile/:userId', async (req, res) => {
                 partnerName = partnerProfile.username;
             } else {
                 partnerName = "Пользователь Discord"; 
-                console.log(`[DEBUG] Профиль партнера ${partnerId} не найден в БД.`);
             }
         }
 
@@ -387,7 +398,6 @@ router.get('/profile/:userId', async (req, res) => {
 });
 
 router.get('/leaderboard', discordOnly, (req, res) => {
-    // Просто отдаем HTML, а данные подгрузит скрипт leaderboard.js
     res.render('leaderboard', { 
         user: req.user, 
         currentPath: '/leaderboard' 
@@ -532,9 +542,9 @@ const dailyRewards = rawRewards.map((r, index) => {
     let mainEmoji = r.stars >= 1000 ? '💎' : (r.stars >= 400 ? '💰' : '🪙');
     
     if (r.itemId) {
-const item = getItemDefinition(r.itemId);
-desc += ` + ${r.amount}x ${item.name}`;
-mainEmoji = item.displayIcon;
+        const item = getItemDefinition(r.itemId);
+        desc += ` + ${r.amount}x ${item.name}`;
+        mainEmoji = item.displayIcon;
     }
     
     return { day: index + 1, description: desc, emoji: mainEmoji };
@@ -558,8 +568,8 @@ router.get('/daily', discordOnly, checkAuth, async (req, res) => {
             canClaim = true;
         }
 
-const currentDayCycle = (profile.dailyStreak % 30) + (canClaim ? 1 : 0);
-const visualDay = currentDayCycle > 30 ? 1 : (currentDayCycle === 0 ? 1 : currentDayCycle);
+        const currentDayCycle = (profile.dailyStreak % 30) + (canClaim ? 1 : 0);
+        const visualDay = currentDayCycle > 30 ? 1 : (currentDayCycle === 0 ? 1 : currentDayCycle);
 
         res.render('daily', { 
             user: req.user, 
@@ -583,7 +593,118 @@ router.get('/messages/:userId', checkAuth, (req, res) => res.render('messages', 
 
 router.get('/bot', async (req, res) => {
     const totalUsers = await UserProfile.countDocuments({ guildId: process.env.GUILD_ID });
-    res.render('bot', { user: req.user, title: 'О Боте', description: 'Официальный бот сервера Дача Зейна. Уникальная экономика, биржа акций, кланы, браки и ежедневные награды.', stats: { users: totalUsers }, currentPath: '/bot' });
+    
+    const bgDir = path.join(process.cwd(), 'public/assets/backgrounds');
+    const frameDir = path.join(process.cwd(), 'public/assets/frames');
+    
+    const getImages = (dir) => {
+        try {
+            return fs.readdirSync(dir).filter(file => /\.(webp|png|jpg|jpeg|gif)$/i.test(file));
+        } catch (err) {
+            console.error('Ошибка чтения папки', dir, err);
+            return [];
+        }
+    };
+
+    const bgAssets = getImages(bgDir).map(file => `/assets/backgrounds/${file}`);
+    const frameAssets = getImages(frameDir).map(file => `/assets/frames/${file}`);
+
+    res.render('bot', { 
+        user: req.user, 
+        title: 'О Боте', 
+        description: 'Официальный бот сервера Дача Зейна. Уникальная экономика, биржа акций, кланы, браки и ежедневные награды.', 
+        stats: { users: totalUsers }, 
+        currentPath: '/bot',
+        bgAssets: bgAssets,
+        frameAssets: frameAssets
+    });
+});
+
+router.get('/status', async (req, res) => {
+    try {
+        const incidents = await SystemStatus.find({ type: 'incident' })
+            .sort({ createdAt: -1 })
+            .limit(10)
+            .lean();
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const recentIncidents = await SystemStatus.find({ 
+            type: 'incident', 
+            createdAt: { $gte: thirtyDaysAgo } 
+        }).lean();
+
+        const activeIncidents = await SystemStatus.find({ type: 'incident', resolved: false }).lean();
+        const isSystemHealthy = activeIncidents.length === 0;
+
+        const currentStatus = {
+            site: 'online',
+            bot: activeIncidents.some(i => i.service === 'bot') ? 'offline' : 'online',
+            database: activeIncidents.some(i => i.service === 'database') ? 'offline' : 'online'
+        };
+
+        const generateUptimeBars = (serviceName) => {
+            const bars = [];
+            for(let i=29; i>=0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+
+                const dayIncidents = recentIncidents.filter(inc => 
+                    inc.service === serviceName && 
+                    new Date(inc.createdAt).toISOString().split('T')[0] === dateStr
+                );
+
+                if (dayIncidents.length > 0) {
+                    bars.push({ status: 'issue', title: `Сбои: ${d.toLocaleDateString('ru-RU')}` });
+                } else {
+                    bars.push({ status: 'good', title: `Работает: ${d.toLocaleDateString('ru-RU')}` });
+                }
+            }
+            return bars;
+        };
+
+        const calculateUptimePct = (serviceName) => {
+            const serviceIncidents = recentIncidents.filter(inc => inc.service === serviceName);
+            let downtimeMs = 0;
+            
+            serviceIncidents.forEach(inc => {
+                const start = new Date(inc.createdAt).getTime();
+                const end = (inc.resolved && inc.resolvedAt) ? new Date(inc.resolvedAt).getTime() : Date.now();
+                downtimeMs += (end - start);
+            });
+            
+            const totalMs = 30 * 24 * 60 * 60 * 1000; 
+            const uptime = ((totalMs - downtimeMs) / totalMs) * 100;
+            
+            return uptime >= 100 ? '100' : Math.max(0, uptime).toFixed(2);
+        };
+
+        const uptimeData = {
+            site: generateUptimeBars('site'),
+            bot: generateUptimeBars('bot'),
+            database: generateUptimeBars('database'),
+            
+            sitePct: calculateUptimePct('site'),
+            botPct: calculateUptimePct('bot'),
+            dbPct: calculateUptimePct('database')
+        };
+
+        res.render('status', {
+            user: req.user,
+            title: 'Статус Системы | Дача Зейна',
+            description: 'Отслеживание состояния серверов, бота и API в реальном времени.',
+            currentPath: '/status',
+            incidents,
+            uptimeData,
+            isSystemHealthy,
+            currentStatus
+        });
+    } catch (e) {
+        console.error('Ошибка на странице статусов:', e);
+        res.status(500).render('500', { user: req.user });
+    }
 });
 
 router.get('/terms', (req, res) => res.render('terms', { 
@@ -610,54 +731,6 @@ router.get('/admin/wiki/edit/:id', checkAuth, checkWikiAccess, async (req, res) 
     const article = await Article.findById(req.params.id).lean();
     if (!article) return res.redirect('/admin/wiki');
     res.render('admin-wiki-edit', { user: req.user, article, noIndex: true });
-});
-
-router.get('/test-notification', checkAuth, async (req, res) => {
-    try {
-        
-        const newNotif = await Notification.create({
-            userId: req.user.id,
-            type: 'SUCCESS',
-            message: `Проверка связи! ${new Date().toLocaleTimeString()}`,
-            link: '/inventory'
-        });
-
-        const io = req.app.get('io');
-        
-        console.log('--- TEST NOTIFICATION DEBUG ---');
-        console.log('1. User ID:', req.user.id, '(Tip: ' + typeof req.user.id + ')');
-        
-        if (!io) {
-            console.log('❌ ОШИБКА: req.app.get("io") вернул undefined! Проверь server.js');
-        } else {
-            console.log('2. IO найден. Попытка отправки в комнату:', String(req.user.id));
-            
-            const roomName = String(req.user.id);
-            
-            const sockets = await io.in(roomName).fetchSockets();
-            console.log('3. Сокетов в этой комнате:', sockets.length);
-
-            if (sockets.length > 0) {
-                io.to(roomName).emit('new_notification', {
-                    _id: newNotif._id,
-                    type: newNotif.type,
-                    message: newNotif.message,
-                    link: newNotif.link,
-                    createdAt: newNotif.createdAt,
-                    read: false
-                });
-                console.log('✅ Отправлено (emit выполнен)');
-            } else {
-                console.log('⚠️ В комнате никого нет! Клиент не подписался или отключился.');
-            }
-        }
-        console.log('-----------------------------');
-
-        res.send('<h1>Отправлено</h1><p>Смотри консоль сервера</p>');
-    } catch (e) {
-        console.error(e);
-        res.send('Ошибка: ' + e.message);
-    }
 });
 
 router.get('/img/proxy/avatar/:userId/:hash', async (req, res) => {

@@ -1,311 +1,609 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <%- include('partials/head', { title: 'Дача Зейна | Bee Swarm Simulator' }) %>
+    <%- include('partials/head') %>
         
     <link rel="preload" href="/css/style.css" as="style">
+    <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <%- include('partials/navbar') %>
 
     <main>
-        <section class="hero-section">
-            <div class="hero-bg-grid"></div>
-            <div class="hero-ambient-glow glow-left"></div>
-            <div class="hero-ambient-glow glow-right"></div>
+        <!-- Скрытый H1 для SEO, если пользователь авторизован и видит дашборд -->
+        <% if (user && myProfile) { %>
+            <h1 class="visually-hidden">Дача Зейна — Игровой Дашборд и Экономика Bee Swarm Simulator</h1>
+        <% } %>
 
-            <div class="hero-decor-wrapper">
-    <div class="decor-item decor-1">
-        <div class="decor-icon di-gold"><i class="fas fa-coins"></i></div>
-        <div class="decor-text">
-            <span>Экономика</span>
-            Уникальный бот
-        </div>
-    </div>
-    <div class="decor-item decor-2">
-        <div class="decor-icon di-purple"><i class="fas fa-trophy"></i></div>
-        <div class="decor-text">
-            <span>Ивенты</span>
-            Турниры и раздачи
-        </div>
-    </div>
-    <div class="decor-item decor-3">
-        <div class="decor-icon di-green"><i class="fas fa-leaf"></i></div>
-        <div class="decor-text">
-            <span>Гайды</span>
-            Секреты ульев
-        </div>
-    </div>
-    <div class="decor-item decor-4">
-        <div class="decor-icon di-blue"><i class="fas fa-users"></i></div>
-        <div class="decor-text">
-            <span>Онлайн</span>
-            Поиск тиммейтов
-        </div>
-    </div>
-</div>
+        <!-- ========================================== -->
+        <!-- 1. ГЛАВНЫЙ ЭКРАН (HERO)                    -->
+        <!-- ========================================== -->
+        <section class="hero-section" aria-label="Главный экран сервера">
+            <div class="hero-bg-grid" aria-hidden="true"></div>
+            <div class="hero-ambient-glow glow-left" aria-hidden="true"></div>
+            <div class="hero-ambient-glow glow-right" aria-hidden="true"></div>
+
+            <!-- Декоративные элементы на фоне -->
+            <div class="hero-decor-wrapper" aria-hidden="true">
+                <div class="decor-item decor-1">
+                    <div class="decor-icon di-gold"><i class="fas fa-coins"></i></div>
+                    <div class="decor-text"><span>Экономика</span>Уникальный бот</div>
+                </div>
+                <div class="decor-item decor-2">
+                    <div class="decor-icon di-purple"><i class="fas fa-trophy"></i></div>
+                    <div class="decor-text"><span>Ивенты</span>Турниры и раздачи</div>
+                </div>
+                <div class="decor-item decor-3">
+                    <div class="decor-icon di-green"><i class="fas fa-leaf"></i></div>
+                    <div class="decor-text"><span>Гайды</span>Секреты ульев</div>
+                </div>
+                <div class="decor-item decor-4">
+                    <div class="decor-icon di-blue"><i class="fas fa-users"></i></div>
+                    <div class="decor-text"><span>Онлайн</span>Поиск тиммейтов</div>
+                </div>
+            </div>
             
             <div class="hero-container hero-animate">
-                <div class="hero-badge">
-                    <span class="live-dot"></span>
-                    Крупнейшее BSS-сообщество СНГ
-                </div>
-                
-                <h1 class="hero-title">
-                    <span class="text-gradient">Дача Зейна</span>
-                </h1>
-                
-                <p class="hero-subtitle">
-                    Хватит фармить в одиночку. Дача Зейна объединяет тысячи игроков Bee Swarm Simulator. 
-                    Находи тиммейтов для макро, читай проверенные гайды и зарабатывай на внутренней экономике.
-                </p>
+                <% if (user && myProfile) { %>
+                    <!-- BENTO ДАШБОРД АВТОРИЗОВАННОГО ПОЛЬЗОВАТЕЛЯ -->
+                    <article class="cyber-dashboard" aria-label="Панель управления игрока">
+                        <header class="cyber-welcome">
+                            <div class="welcome-text">
+                                <h2>Привет, <span class="text-gradient"><%= user.username %></span>!</h2>
+                                <p>Системы в норме. Экономика ждет твоих решений. Забирай награды и доминируй на сервере.</p>
+                            </div>
+                            <div class="welcome-badge" title="Статус подключения: В сети">
+                                <i class="fas fa-satellite-dish" aria-hidden="true"></i> В сети
+                            </div>
+                        </header>
 
-                <div class="hero-action-panel">
-                    <div class="hap-stats">
-                        <div class="hap-stat-item">
-                            <i class="fas fa-users"></i>
-                            <div class="hap-text">
-                                <span class="hap-value"><%= stats.serverMembers ? stats.serverMembers.toLocaleString('ru-RU') : '35 000+' %></span>
-                                <span class="hap-label">Пчеловодов</span>
-                            </div>
+                        <div class="bento-grid">
+                            <section class="bento-box box-bank" aria-labelledby="capital-title">
+                                <div class="bank-3d-wrapper" aria-hidden="true">
+                                    <div class="cyber-core">
+                                        <div class="core-ring"></div>
+                                        <div class="core-ring-2"></div>
+                                        <div id="star-3d-canvas"></div>
+                                    </div>
+                                </div>
+                                <h3 id="capital-title" class="bank-title">Твой капитал</h3>
+                                <div class="bank-amount" aria-label="Баланс: <%= myProfile.stars || 0 %> звезд"><%= (myProfile.stars || 0).toLocaleString('ru-RU') %></div>
+                            </section>
+
+                            <% const progressPercent = Math.min(((myProfile.totalMessages || 0) % 100), 100); %>
+                            <section class="bento-box box-progress" aria-label="Уровень активности">
+                                <div class="prog-header">
+                                    <h3 class="prog-title">Активность</h3>
+                                    <span class="prog-level" title="Текущий уровень">Уровень <%= myProfile.level || 1 %></span>
+                                </div>
+                                <div class="prog-bar-bg" role="progressbar" aria-valuenow="<%= progressPercent %>" aria-valuemin="0" aria-valuemax="100" aria-label="Прогресс до следующего уровня">
+                                    <div class="prog-bar-fill" style="width: <%= progressPercent %>%;"></div>
+                                </div>
+                                <div class="prog-footer" aria-hidden="true">
+                                    <span>Опыт активности</span>
+                                    <span><%= progressPercent %>%</span>
+                                </div>
+                            </section>
+
+                            <section class="bento-box box-stat" aria-label="Статистика сообщений">
+                                <div class="stat-icon ic-msg" aria-hidden="true"><i class="fas fa-comment-dots"></i></div>
+                                <div class="stat-info">
+                                    <h3 class="stat-label">Сообщения</h3>
+                                    <span class="stat-val"><%= (myProfile.totalMessages || 0).toLocaleString('ru-RU') %></span>
+                                </div>
+                            </section>
+
+                            <section class="bento-box box-stat" aria-label="Ежедневная активность">
+                                <div class="stat-icon ic-fire" aria-hidden="true"><i class="fas fa-fire"></i></div>
+                                <div class="stat-info">
+                                    <h3 class="stat-label">Daily Стрик</h3>
+                                    <span class="stat-val"><%= myProfile.dailyStreak || 0 %> дн.</span>
+                                </div>
+                            </section>
                         </div>
-                        <div class="hap-divider"></div>
-                        <div class="hap-stat-item">
-                            <div class="online-ring"></div>
-                            <div class="hap-text">
-                                <span class="hap-value text-online"><%= stats.onlineMembers ? stats.onlineMembers.toLocaleString('ru-RU') : '5 000+' %></span>
-                                <span class="hap-label">В сети сейчас</span>
-                            </div>
-                        </div>
+
+                        <nav class="cyber-actions" aria-label="Быстрые действия">
+                            <a href="/profile" class="cyber-btn btn-glow" title="Перейти в профиль"><i class="fas fa-user-astronaut" aria-hidden="true"></i> Профиль</a>
+                            <a href="/daily" class="cyber-btn btn-dark" title="Забрать ежедневный лут"><i class="fas fa-box-open" aria-hidden="true"></i> Daily Лут</a>
+                            <a href="/shop" class="cyber-btn btn-dark" title="Перейти в Черный Рынок"><i class="fas fa-shopping-cart" aria-hidden="true"></i> Черный Рынок</a>
+                        </nav>
+                    </article>
+
+                <% } else { %>
+                    <!-- ИНТЕРФЕЙС ГОСТЯ -->
+                    <div class="hero-badge" role="status">
+                        <span class="live-dot" aria-hidden="true"></span>
+                        Крупнейшее BSS-сообщество СНГ
                     </div>
                     
-                    <a href="https://discord.gg/bandazeyna" target="_blank" class="hap-btn-join">
-                        <i class="fab fa-discord"></i>
-                        <span>Вступить на сервер</span>
-                        <i class="fas fa-arrow-right btn-arrow"></i>
-                    </a>
-                </div>
-                
-                <div class="hero-quick-links">
-                    <a href="/wiki"><i class="fas fa-book-open"></i> База знаний</a>
-                    <span class="ql-divider">•</span>
-                    <a href="/giveaways"><i class="fas fa-gift"></i> Розыгрыши</a>
-                </div>
+                    <h1 class="hero-title">
+                        <span class="text-gradient">Дача Зейна</span>
+                    </h1>
+                    
+                    <p class="hero-subtitle">
+                        Хватит фармить в одиночку. Дача Зейна объединяет тысячи игроков Bee Swarm Simulator. 
+                        Находи тиммейтов для макро, читай проверенные гайды и зарабатывай на внутренней экономике.
+                    </p>
+
+                    <div class="hero-action-panel" aria-label="Статистика сервера">
+                        <div class="hap-stats">
+                            <div class="hap-stat-item" title="Общее количество участников">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                                <div class="hap-text">
+                                    <strong class="hap-value"><%= stats.serverMembers ? stats.serverMembers.toLocaleString('ru-RU') : '35 000+' %></strong>
+                                    <span class="hap-label">Пчеловодов</span>
+                                </div>
+                            </div>
+                            <div class="hap-divider" aria-hidden="true"></div>
+                            <div class="hap-stat-item" title="Участников онлайн прямо сейчас">
+                                <div class="online-ring" aria-hidden="true"></div>
+                                <div class="hap-text">
+                                    <strong id="live-online-count" class="hap-value text-online">
+    <%= stats.onlineMembers ? stats.onlineMembers.toLocaleString('ru-RU') : '5 000+' %>
+</strong>
+                                    <span class="hap-label">В сети сейчас</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="https://discord.gg/bandazeyna" target="_blank" rel="noopener noreferrer" class="hap-btn-join" title="Присоединиться к серверу Дача Зейна в Discord">
+                            <i class="fab fa-discord" aria-hidden="true"></i>
+                            <span>Вступить на сервер</span>
+                            <i class="fas fa-arrow-right btn-arrow" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                    
+                    <nav class="hero-quick-links" aria-label="Быстрые ссылки">
+                        <a href="/wiki" title="Изучить базу знаний BSS"><i class="fas fa-book-open" aria-hidden="true"></i> База знаний</a>
+                        <span class="ql-divider" aria-hidden="true">•</span>
+                        <a href="/giveaways" title="Участвовать в розыгрышах"><i class="fas fa-gift" aria-hidden="true"></i> Розыгрыши</a>
+                    </nav>
+                <% } %>
             </div>
         </section>
 
-        <div class="ticker-wrap">
+        <!-- ========================================== -->
+        <!-- БЕГУЩАЯ СТРОКА                             -->
+        <!-- ========================================== -->
+        <div class="ticker-wrap" aria-hidden="true">
             <div class="ticker">
                 <span class="ticker-item">🐝 <b>Bee Swarm</b> Community #1</span>
-                <span class="ticker-item">🍯 <b>$HONEY</b> Rate: High</span>
-                <span class="ticker-item">🎟️ <b>$TICKETS</b> +5.2%</span>
+                <span class="ticker-item">⭐ <b>Balance</b> 10,000</span>
+                <span class="ticker-item">🤖 <b>Economy</b> +5.2%</span>
                 <span class="ticker-item">💰 <b>Giveaways</b> Coming Soon</span>
                 <span class="ticker-item">💎 <b>Robux</b> Giveaways</span>
                 <span class="ticker-item">🐝 <b>Bee Swarm</b> Community #1</span>
-                <span class="ticker-item">🍯 <b>$HONEY</b> Rate: High</span>
+                <span class="ticker-item">⭐ <b>Balance</b> 10,000</span>
+                <span class="ticker-item">🤖 <b>Economy</b> +5.2%</span>
+                <span class="ticker-item">💰 <b>Giveaways</b> Coming Soon</span>
+                <span class="ticker-item">💎 <b>Robux</b> Giveaways</span>
             </div>
         </div>
 
-        <section class="features-section">
-            <div class="section-header" data-aos="fade-up">
-                <h2>Всё для комфортной игры</h2>
-                <p>Экосистема, созданная игроками для игроков.</p>
+        <!-- ========================================== -->
+        <!-- 2. БАЗОВАЯ СЕКЦИЯ: ФИЧИ                    -->
+        <!-- ========================================== -->
+        <section class="features-section" aria-labelledby="features-title">
+            <!-- Интерактивный фон: Плавающие соты -->
+            <div class="honeycomb-bg" aria-hidden="true">
+                <div class="hex hex-1"></div><div class="hex hex-2"></div>
+                <div class="hex hex-3"></div><div class="hex hex-4"></div>
             </div>
+
+            <header class="section-header" data-aos="fade-up">
+                <h2 id="features-title">Всё для комфортной игры</h2>
+                <p>Экосистема, созданная игроками для игроков.</p>
+            </header>
             
             <div class="features-grid">
-                <a href="/wiki" class="feature-box f-wiki" data-aos="zoom-in" data-aos-delay="100">
+                <a href="/wiki" class="feature-box f-wiki" data-aos="zoom-in" data-aos-delay="100" title="Перейти в Базу знаний">
                     <div class="fb-bg"></div>
-                    <div class="fb-icon"><i class="fas fa-book-open"></i></div>
+                    <div class="fb-icon"><i class="fas fa-book-open" aria-hidden="true"></i></div>
                     <h3>База знаний</h3>
                     <p>Гайды, билды и советы от профи. Узнай, как сделать тот или иной улей</p>
-                    <div class="fb-link">Читать <i class="fas fa-arrow-right"></i></div>
+                    <div class="fb-link" aria-hidden="true">Читать <i class="fas fa-arrow-right"></i></div>
                 </a>
 
-                <a class="feature-box f-team" data-aos="zoom-in" data-aos-delay="200">
+                <div class="feature-box f-team" data-aos="zoom-in" data-aos-delay="200" tabindex="0">
                     <div class="fb-bg"></div>
-                    <div class="fb-icon"><i class="fas fa-users"></i></div>
+                    <div class="fb-icon"><i class="fas fa-users" aria-hidden="true"></i></div>
                     <h3>Поиск тиммейтов</h3>
                     <p>Найди напарника для макро, фарма мёда или стикеров за пару минут.</p>
-                </a>
+                </div>
 
-                <a href="/giveaways" class="feature-box f-event" data-aos="zoom-in" data-aos-delay="300">
+                <div class="feature-box f-trading" data-aos="zoom-in" data-aos-delay="300" tabindex="0">
                     <div class="fb-bg"></div>
-                    <div class="fb-icon"><i class="fas fa-gift"></i></div>
-                    <h3>Ивенты & розыгрыши</h3>
-                    <p>Регулярные раздачи Robux, ваучеров и редких предметов.</p>
-                    <div class="fb-link">К раздачам <i class="fas fa-arrow-right"></i></div>
-                </a>
+                    <div class="fb-icon"><i class="fas fa-exchange-alt" aria-hidden="true"></i></div>
+                    <h3>Трейд стикеров</h3>
+                    <p>Находи выгодные обмены, оценивай свой инвентарь и торгуй абсолютно безопасно.</p>
+                </div>
                 
-                <div class="feature-box f-trade" data-aos="zoom-in" data-aos-delay="400">
+                <div class="feature-box f-shield" data-aos="zoom-in" data-aos-delay="400" tabindex="0">
                     <div class="fb-bg"></div>
-                    <div class="fb-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div class="fb-icon"><i class="fas fa-shield-alt" aria-hidden="true"></i></div>
                     <h3>Модерация</h3>
-                    <p>Состав, который задаст вопрос и сам его же решит</p>
+                    <p>Адекватная администрация, которая следит за порядком и оперативно решает любые вопросы.</p>
                 </div>
             </div>
         </section>
 
-        <section class="steps-section">
-            <div class="section-header" data-aos="fade-up">
-                <h2>Как начать играть?</h2>
-                <p>Твой путь от новичка до магната сервера.</p>
+        <!-- ========================================== -->
+        <!-- 3. НОВАЯ СЕКЦИЯ: ИГРОВОЙ ХАБ (ПРОФИЛИ)     -->
+        <!-- ========================================== -->
+        <section class="portal-section" aria-labelledby="hub-title">
+            <!-- Интерактивный фон: Кибер-сетка -->
+            <div class="cyber-lines-bg" aria-hidden="true"></div>
+
+            <div class="portal-container">
+                <div class="portal-content" data-aos="fade-right">
+                    <div class="p-badge"><i class="fas fa-globe" aria-hidden="true"></i> САЙТ СЕРВЕРА</div>
+                    <h2 id="hub-title">Твой профиль <br><span class="text-gradient">на сайте</span></h2>
+                    <p>Дача Зейна — это не только Discord. У нас есть собственный сайт, который синхронизируется с твоим аккаунтом и добавляет новые фишки.</p>
+                    
+                    <div class="portal-features">
+                        <article class="pf-item">
+                            <div class="pf-icon"><i class="fas fa-id-badge" aria-hidden="true"></i></div>
+                            <div>
+                                <h3>Кастомные профили</h3>
+                                <span>Настраивай фон, покупай рамки для аватара и показывай свои достижения.</span>
+                            </div>
+                        </article>
+                        <article class="pf-item">
+                            <div class="pf-icon"><i class="fas fa-chart-pie" aria-hidden="true"></i></div>
+                            <div>
+                                <h3>Детальная статистика</h3>
+                                <span>Отслеживай свои сообщения, стрик заходов и заработанные звезды.</span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <!-- Визуализация Игрового Хаба (Сетка карточек) -->
+                <div class="portal-grid-visual" data-aos="fade-left">
+                    <article class="pgv-card" tabindex="0">
+                        <div class="pgv-icon"><i class="fas fa-store" aria-hidden="true"></i></div>
+                        <h3>Магазин</h3>
+                        <p>Трать звезды на уникальные роли и кастомизацию.</p>
+                    </article>
+                    <article class="pgv-card" tabindex="0">
+                        <div class="pgv-icon"><i class="fas fa-box" aria-hidden="true"></i></div>
+                        <h3>Инвентарь</h3>
+                        <p>Храни предметы, кейсы и ценный лут с раздач.</p>
+                    </article>
+                    <article class="pgv-card" tabindex="0">
+                        <div class="pgv-icon"><i class="fas fa-tasks" aria-hidden="true"></i></div>
+                        <h3>Задания</h3>
+                        <p>Выполняй квесты и получай опыт для уровня.</p>
+                    </article>
+                    <article class="pgv-card" tabindex="0">
+                        <div class="pgv-icon"><i class="fas fa-sync-alt" aria-hidden="true"></i></div>
+                        <h3>Синхронизация</h3>
+                        <p>Весь прогресс привязан к твоему Discord.</p>
+                    </article>
+                </div>
             </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 4. НОВАЯ СЕКЦИЯ: ВОЙСЫ И МАКРО             -->
+        <!-- ========================================== -->
+        <section class="voice-section" aria-labelledby="voice-title">
+            <div class="voice-bg-elements" aria-hidden="true"></div>
+            <!-- Интерактивный фон: Эквалайзер -->
+            <div class="audio-waves-bg" aria-hidden="true">
+                <div class="wave-bar w1"></div><div class="wave-bar w2"></div>
+                <div class="wave-bar w3"></div><div class="wave-bar w4"></div>
+                <div class="wave-bar w5"></div><div class="wave-bar w6"></div>
+                <div class="wave-bar w7"></div><div class="wave-bar w8"></div>
+            </div>
+
+            <div class="voice-container">
+                <!-- Псевдо-интерфейс Discord -->
+                <div class="voice-visual" data-aos="zoom-in" data-aos-delay="100" aria-hidden="true">
+                    <div class="discord-ui">
+                        <div class="dui-header">
+                            <i class="fas fa-volume-up"></i> <span>🍯 Фарм</span>
+                            <div class="dui-status">В эфире</div>
+                        </div>
+                        <div class="dui-users">
+                            <div class="dui-user speaking">
+                                <div class="dui-avatar"><img src="/assets/img/avatars/default_avatar.png" alt="Аватар игрока 1"></div>
+                                <span class="dui-name">legend</span>
+                                <div class="dui-wave"><span></span><span></span><span></span></div>
+                            </div>
+                            <div class="dui-user speaking">
+                                <div class="dui-avatar"><img src="/assets/img/avatars/default_avatar.png" alt="Аватар игрока 2"></div>
+                                <span class="dui-name">honey_maker</span>
+                                <div class="dui-wave"><span></span><span></span><span></span></div>
+                            </div>
+                            <div class="dui-user muted">
+                                <div class="dui-avatar"><img src="/assets/img/avatars/default_avatar.png" alt="Аватар игрока 3"></div>
+                                <span class="dui-name">blue_hiver</span>
+                                <i class="fas fa-microphone-slash mute-icon"></i>
+                            </div>
+                            <div class="dui-user muted">
+                                <div class="dui-avatar"><img src="/assets/img/avatars/default_avatar.png" alt="Аватар игрока 4"></div>
+                                <span class="dui-name">fuzzy_boy</span>
+                                <i class="fas fa-microphone-slash mute-icon"></i>
+                            </div>
+                            <div class="dui-more">+12 других</div>
+                        </div>
+                        <div class="dui-footer">
+                            <div class="dui-btn btn-green"><i class="fas fa-video"></i> Стрим</div>
+                            <div class="dui-btn btn-red"><i class="fas fa-phone-slash"></i> Отключиться</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="voice-content" data-aos="fade-left" data-aos-delay="200">
+                    <h2 id="voice-title" style="font-size: clamp(2rem, 3vw, 2.8rem);">Круглосуточный <br><span class="text-primary">фарм и общение</span></h2>
+                    <p>Надоело стоять на синем поле в одиночку? Дача Зейна славится своим активом.</p>
+                    <p>У нас всегда заполнены голосовые каналы. Заходи, находи напарников для совместного макроса, ставьте бусты вместе и фармите мёд в 10 раз быстрее в компании топовых игроков.</p>
+                    <ul class="voice-list">
+                        <li><i class="fas fa-check-circle" aria-hidden="true"></i> Постоянный актив и совместный фарм</li>
+                        <li><i class="fas fa-check-circle" aria-hidden="true"></i> Помощь с квестами и советами по игре</li>
+                        <li><i class="fas fa-check-circle" aria-hidden="true"></i> Приятное общение и ламповая атмосфера</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 5. НОВАЯ СЕКЦИЯ: ЕЖЕДНЕВНЫЙ ЛУТ            -->
+        <!-- ========================================== -->
+        <section class="loot-section" aria-labelledby="loot-title">
+            <!-- Интерактивный фон: Вращающиеся лучи -->
+            <div class="radiant-beams" aria-hidden="true"></div>
+
+            <header class="section-header" data-aos="fade-up">
+                <h2 id="loot-title">Раздачи и <span class="text-gradient">халява</span></h2>
+                <p>Мы любим баловать наших игроков. Множества наград и масштабные ивенты.</p>
+            </header>
+
+            <div class="loot-cards-epic" data-aos="fade-up" data-aos-delay="100">
+                <a href="/daily" class="epic-card card-daily text-decoration-none" title="Забрать ежедневную награду">
+                    <div class="epic-glow"></div>
+                    <div class="epic-content">
+                        <div class="epic-icon"><i class="fas fa-calendar-check" aria-hidden="true"></i></div>
+                        <h3>Daily Лут</h3>
+                        <p>Заходи каждый день, жми кнопку и получай звезды. Чем больше стрик — тем жирнее куш.</p>
+                        <div class="epic-action" aria-hidden="true"><span>Забрать лут</span> <i class="fas fa-arrow-right"></i></div>
+                    </div>
+                </a>
+                
+                <a href="/giveaways" class="epic-card card-giveaway text-decoration-none" title="Перейти к розыгрышам">
+                    <div class="epic-glow"></div>
+                    <div class="epic-content">
+                        <div class="epic-icon"><i class="fas fa-gift" aria-hidden="true"></i></div>
+                        <h3>Розыгрыши</h3>
+                        <p>Участвуй в регулярных розыгрышах Robux, Ваучеров на мед и редчайших стикеров.</p>
+                        <div class="epic-action" aria-hidden="true"><span>Участвовать</span> <i class="fas fa-arrow-right"></i></div>
+                    </div>
+                </a>
+
+                <article class="epic-card card-event" tabindex="0">
+                    <div class="epic-glow"></div>
+                    <div class="epic-content">
+                        <div class="epic-icon"><i class="fas fa-trophy" aria-hidden="true"></i></div>
+                        <h3>Турниры</h3>
+                        <p>Соревнуйся в серверных ивентах по разным играм, докажи свой скилл и забирай главные призы.</p>
+                        <div class="epic-action" aria-hidden="true"><span>Скоро</span></div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="hof-section" aria-labelledby="hof-title">
+    <div class="hof-bg-glow" aria-hidden="true"></div>
+    <div class="falling-sparks" aria-hidden="true">
+        <div class="spark s1"></div><div class="spark s2"></div><div class="spark s3"></div>
+        <div class="spark s4"></div><div class="spark s5"></div><div class="spark s6"></div>
+    </div>
+    
+    <header class="section-header" data-aos="fade-up">
+        <h2 id="hof-title" style="font-size: clamp(3rem, 5vw, 3rem);">Зал <span style="color: #f1c40f;">славы</span></h2>
+        <p>Самые активные участники сообщества по количеству сообщений.</p>
+    </header>
+
+    <div class="hof-container">
+       <% if (typeof topUsers !== 'undefined' && topUsers.length > 0) { %>
+        <% 
+            const getAvatar = (u) => {
+                if (u.avatar && u.avatar !== '') {
+                    return `/img/proxy/avatar/${u.userId}/${u.avatar}`;
+                }
+                return '/assets/img/avatars/default_avatar.png';
+            };
+        %>
+            
+            <% const mvp = topUsers[0]; %>
+            <article class="hof-mvp-card" data-aos="fade-right" data-aos-delay="100">
+                <div class="mvp-glow"></div>
+                <div class="mvp-header">
+                    <div class="mvp-avatar-wrap">
+                        <img src="<%= getAvatar(mvp) %>" alt="Аватар <%= mvp.username %>" onerror="this.src='/assets/img/avatars/default_avatar.png'">
+                        <div class="mvp-badge">1</div>
+                    </div>
+                    
+                    <div class="mvp-title-wrap" style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 15px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-crown" style="color: #f1c40f; font-size: 1.6rem;"></i>
+                            <h3 class="text-gradient" style="margin-bottom: 0;"><%= mvp.username %></h3>
+                        </div>
+                        <span class="mvp-level" style="color: var(--primary);"><%= (mvp.totalMessages || 0).toLocaleString('ru-RU') %> сообщений</span>
+                    </div>
+                </div>
+                
+                <div class="mvp-stats">
+                    <div class="m-stat">
+                        <span>Звезды</span>
+                        <strong style="color: #f1c40f;"><%= (mvp.stars || 0).toLocaleString('ru-RU') %> ⭐</strong>
+                    </div>
+                    <div class="m-stat">
+                        <span>Уровень</span>
+                        <strong><%= mvp.level || 1 %></strong>
+                    </div>
+                </div>
+            </article>
+
+            <div class="hof-list-wrapper" data-aos="fade-left" data-aos-delay="200">
+                <% topUsers.slice(1).forEach((user, index) => { %>
+                    <% 
+                        const rank = index + 2; 
+                        let rankColor = rank === 2 ? '#bdc3c7' : (rank === 3 ? '#cd7f32' : '#888');
+                    %>
+                    <article class="hof-row rank-<%= rank %>">
+                        <div class="hr-pos" style="color: <%= rankColor %>;">#<%= rank %></div>
+                        <div class="hr-user">
+                            <img src="<%= getAvatar(user) %>" alt="Аватар <%= user.username %>" onerror="this.src='/assets/img/avatars/default_avatar.png'">
+                            <h3 class="hr-name"><%= user.username %></h3>
+                        </div>
+                        <div class="hr-stat" style="color: var(--primary); font-weight: bold;">
+                            <%= (user.totalMessages || 0).toLocaleString('ru-RU') %>
+                            <span style="font-size: 0.7rem; opacity: 0.7; margin-left: 4px;">MSG</span>
+                        </div>
+                    </article>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <p style="text-align: center; width: 100%; color: var(--text-muted);">Зал славы обновляется...</p>
+        <% } %>
+    </div>
+            
+            <div class="hof-actions" data-aos="fade-up" data-aos-delay="300" style="display: flex; justify-content: center; width: 100%; margin-top: 50px;">
+                <a href="/leaderboard" class="hof-btn" title="Посмотреть полный список лидеров">
+                    <span>Полный рейтинг</span>
+                    <i class="fas fa-list-ol" aria-hidden="true"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 7. БАЗОВАЯ СЕКЦИЯ: ШАГИ (ТЕРМИНАЛЫ)        -->
+        <!-- ========================================== -->
+        <section class="steps-section" aria-labelledby="steps-title">
+            <header class="section-header" data-aos="fade-up">
+                <h2 id="steps-title">Как начать играть?</h2>
+                <p>Твой путь от новичка до магната сервера.</p>
+            </header>
             
             <div class="steps-grid">
-                <div class="step-card" data-aos="fade-right" data-aos-delay="100">
-                    <div class="step-window">
+                <article class="step-card" data-aos="fade-right" data-aos-delay="100">
+                    <div class="step-window" aria-hidden="true">
                         <div class="win-bar">
                             <div class="win-dots"><span></span><span></span><span></span></div>
                             <div class="win-title">discord_invite.exe</div>
                         </div>
                         <div class="win-screen">
-                            <video autoplay loop muted playsinline class="step-video">
+                            <video autoplay loop muted playsinline preload="none" class="step-video" poster="/assets/img/video-placeholder.jpg">
                                 <source src="/videos/step1.mp4" type="video/mp4">
                             </video>
                             <div class="scanline"></div>
                         </div>
                     </div>
                     <div class="step-info">
-                        <div class="step-badge">01</div>
+                        <div class="step-badge" aria-hidden="true">01</div>
                         <h3>Вступи в сервер</h3>
                         <p>Зайдите на сервер, ознакомьтесь с правилами и узнайте, как всё устроено.</p>
                     </div>
-                </div>
+                </article>
 
                 <div class="step-connector" data-aos="fade-in" data-aos-delay="200" aria-hidden="true">
                     <i class="fas fa-chevron-right"></i>
                 </div>
 
-                <div class="step-card" data-aos="fade-up" data-aos-delay="300">
-                    <div class="step-window">
+                <article class="step-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="step-window" aria-hidden="true">
                         <div class="win-bar">
                             <div class="win-dots"><span></span><span></span><span></span></div>
                             <div class="win-title">command_prompt</div>
                         </div>
                         <div class="win-screen">
-                            <video autoplay loop muted playsinline class="step-video">
+                            <video autoplay loop muted playsinline preload="none" class="step-video" poster="/assets/img/video-placeholder.jpg">
                                 <source src="/videos/step2.mp4" type="video/mp4">
                             </video>
                             <div class="scanline"></div>
                         </div>
                     </div>
                     <div class="step-info">
-                        <div class="step-badge">02</div>
+                        <div class="step-badge" aria-hidden="true">02</div>
                         <h3>Создай профиль</h3>
                         <p>Начни активно общаться с другими пользователями на сервере.</p>
                     </div>
-                </div>
+                </article>
 
                 <div class="step-connector" data-aos="fade-in" data-aos-delay="400" aria-hidden="true">
                     <i class="fas fa-chevron-right"></i>
                 </div>
 
-                <div class="step-card" data-aos="fade-left" data-aos-delay="500">
-                    <div class="step-window">
+                <article class="step-card" data-aos="fade-left" data-aos-delay="500">
+                    <div class="step-window" aria-hidden="true">
                         <div class="win-bar">
                             <div class="win-dots"><span></span><span></span><span></span></div>
-                            <div class="win-title">market_terminal</div>
+                            <div class="win-title">eco_system</div>
                         </div>
                         <div class="win-screen">
-                            <video autoplay loop muted playsinline class="step-video">
+                            <video autoplay loop muted playsinline preload="none" class="step-video" poster="/assets/img/video-placeholder.jpg">
                                 <source src="/videos/step3.mp4" type="video/mp4">
                             </video>
                             <div class="scanline"></div>
                         </div>
                     </div>
                     <div class="step-info">
-                        <div class="step-badge">03</div>
-                        <h3>Фарми и торгуй</h3>
-                        <p>Общайся, получай валюту и скупай перспективные акции.</p>
+                        <div class="step-badge" aria-hidden="true">03</div>
+                        <h3>Общайся и фарми</h3>
+                        <p>Проводи время в каналах, общайся, копи звёзды и покупай крутые роли или кастомизацию.</p>
                     </div>
-                </div>
+                </article>
             </div>
         </section>
 
-        <section class="section-cta">
-            <div class="cta-bg-layer">
+        <!-- ========================================== -->
+        <!-- 8. БАЗОВАЯ СЕКЦИЯ: ПРИЗЫВ (CTA)            -->
+        <!-- ========================================== -->
+        <section class="section-cta" aria-labelledby="cta-title">
+            <div class="cta-bg-layer" aria-hidden="true">
                 <div class="stars-static"></div>
                 <div class="grid-floor"></div>
                 <div class="horizon-light"></div>
             </div>
 
             <div class="cta-content" data-aos="zoom-in">
-                <div class="cta-badge">ПРИСОЕДИНЯЙСЯ</div>
-                <h2 class="glitch-title" data-text="Дача Зейна ждет тебя">Дача Зейна ждет тебя</h2>
+                <div class="cta-badge" aria-hidden="true">ПРИСОЕДИНЯЙСЯ</div>
+                <h2 id="cta-title" class="glitch-title" data-text="Дача Зейна ждет тебя">Дача Зейна ждет тебя</h2>
                 <p>Хватит играть в одиночку. Присоединяйся к самому активному сообществу по Roblox в СНГ прямо сейчас.</p>
                 
                 <div class="cta-actions">
-                    <a href="https://discord.gg/bandazeyna" class="btn-primary big pulse-btn" aria-label="Вступить в Discord сервер">
-                        <i class="fab fa-discord"></i> Вступить в сервер
+                    <a href="https://discord.gg/bandazeyna" class="cta-discord-btn pulse-btn" target="_blank" rel="noopener noreferrer" title="Вступить на сервер в Discord">
+                        <i class="fab fa-discord" aria-hidden="true"></i> Вступить в сервер
                     </a>
                 </div>
 
-                <div class="cta-stats-row">
-                    <div class="cs-stat">
-                        <i class="fas fa-user-check"></i>
-                        <span>30,000+ Участников</span>
-                    </div>
-                    <div class="cs-divider"></div>
-                    <div class="cs-stat">
-                        <i class="fas fa-bolt"></i>
-                        <span>24/7 Актив</span>
-                    </div>
-                    <div class="cs-divider"></div>
-                    <div class="cs-stat">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Безопасно</span>
-                    </div>
-                </div>
+                <div class="cta-stats-row" aria-label="Преимущества сервера">
+    <div class="cs-stat" title="Более <%= stats.users || 30000 %> пчеловодов уже с нами">
+        <i class="fas fa-user-check" aria-hidden="true"></i>
+        <span><%= stats.users ? stats.users.toLocaleString('ru-RU') : '30 000+' %> Профилей</span>
+    </div>
+    <div class="cs-divider" aria-hidden="true"></div>
+    <div class="cs-stat" title="Общий капитал игроков на сервере">
+        <i class="fas fa-coins" aria-hidden="true"></i>
+        <span>
+            <%= stats.stars ? (stats.stars > 1000000 ? (stats.stars / 1000000).toFixed(1) + 'M+' : stats.stars.toLocaleString('ru-RU')) : '1M+' %> Звезд в обороте
+        </span>
+    </div>
+    <div class="cs-divider" aria-hidden="true"></div>
+    <div class="cs-stat" title="Фармим мёд круглосуточно">
+        <i class="fas fa-bolt" aria-hidden="true"></i>
+        <span>24/7 Актив</span>
+    </div>
+</div>
             </div>
         </section>
     </main>
 
     <%- include('partials/footer') %>
 
-    <script nonce="<%= nonce %>">
-        document.addEventListener('DOMContentLoaded', () => {
-            const isMobile = window.innerWidth < 768;
-
-            const initAOS = () => {
-                if (typeof AOS !== 'undefined') {
-                    if (!isMobile) {
-                        AOS.init({ once: true, offset: 100, duration: 800 });
-                    } 
-                } else {
-                    setTimeout(initAOS, 100); 
-                }
-            };
-            initAOS();
-        });
-    </script>
-    <script nonce="<%= nonce %>">
-        document.addEventListener("DOMContentLoaded", () => {
-            if (window.Modal) window.Modal.init();
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const error = urlParams.get('error');
-            const success = urlParams.get('success');
-            
-            if (error) {
-                let errorMessage = "Произошла неизвестная ошибка при авторизации.";
-                if (error === 'vpn_blocked') errorMessage = "Обнаружено использование VPN или Proxy. Пожалуйста, отключите его для прохождения верификации.";
-                else if (error === 'banned_alt') errorMessage = "Верификация отклонена. Ваш IP-адрес связан с заблокированным аккаунтом на нашем сервере.";
-                else if (error === 'discord_limit') errorMessage = "Слишком много запросов к Discord. Попробуйте позже.";
-                
-                window.Modal.alert('Ошибка авторизации', errorMessage, 'error');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-
-            if (success === 'verified') {
-                window.Modal.alert(
-                    'Верификация пройдена!', 
-                    'Вы успешно подтвердили свой аккаунт. Роль выдана, теперь вам доступен весь сервер!', 
-                    'success'
-                );
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        });
-    </script>
+    <script src="/js/home.js" nonce="<%= nonce %>" defer></script>
 </body>
 </html>

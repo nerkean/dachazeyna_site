@@ -29,7 +29,7 @@
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png" />
 <meta name="apple-mobile-web-app-title" content="Дача Зейна" />
-<link rel="manifest" href="/assets/img/favicons/site.webmanifest" />
+<link rel="manifest" href="/assets/img/favicons/site.webmanifest" fetchpriority="low" crossorigin="use-credentials">
 
 <link rel="preload" href="/assets/fonts/web/montserrat-v31-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/web/montserrat-v31-cyrillic_latin-500.woff2" as="font" type="font/woff2" crossorigin>
@@ -97,3 +97,5 @@
 
 <script src="/libs/aos.js" defer></script> 
 <script src="/js/modals.js" defer></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/status-socket.js"></script>

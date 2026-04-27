@@ -277,6 +277,30 @@
 .info-box i { color: #3498db; }
 .info-box strong { color: #3498db; }
 
+.danger-box {
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.2);
+    border-left: 4px solid #e74c3c;
+    color: #fca5a5;
+}
+.danger-box i.main-icon { color: #e74c3c; }
+.danger-box h4 {
+    color: #e74c3c;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.15rem;
+}
+.danger-box p {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #fca5a5;
+}
+.danger-box p:last-child {
+    margin-bottom: 0;
+}
+.danger-box strong { color: #e74c3c; }
+
 .tags-container {
     display: flex;
     flex-wrap: wrap;

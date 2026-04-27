@@ -19,7 +19,7 @@ router.post('/set-fingerprint', express.json(), (req, res) => {
 router.get('/discord', passport.authenticate('discord'));
 
 router.get('/discord/callback', (req, res, next) => {
-    passport.authenticate('discord', (err, user, info) => {
+    passport.authenticate('discord', async (err, user, info) => {
         if (err) {
             console.error('=== ОШИБКА АВТОРИЗАЦИИ DISCORD ===', err);
 
@@ -40,7 +40,24 @@ router.get('/discord/callback', (req, res, next) => {
             if (info && info.message === 'ACCOUNT_TOO_NEW') {
                 return res.redirect('/verify?error=account_too_new');
             }
+            if (info && info.message === 'BANNED_HWID') {
+                return res.redirect('/verify?error=banned_hwid'); 
+            }
             return res.redirect('/verify?error=no_user');
+        }
+
+        try {
+            await UserProfile.updateMany(
+                { userId: user.id },
+                { 
+                    $set: { 
+                        username: user.username,
+                        avatar: user.avatar 
+                    } 
+                }
+            );
+        } catch (dbErr) {
+            console.error('Ошибка обновления аватара при входе:', dbErr);
         }
 
         req.logIn(user, (loginErr) => {

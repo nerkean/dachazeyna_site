@@ -1,0 +1,160 @@
+<%- include('partials/head', { title: 'Статус Системы | Dacha Zeyna' }) %>
+
+<link rel="stylesheet" href="/css/status.css">
+<script src="/socket.io/socket.io.js"></script>
+
+<%- include('partials/navbar') %>
+
+<main class="status-page">
+    <div class="status-container">
+        
+        <!-- ДИНАМИЧЕСКИЙ ГЛАВНЫЙ СТАТУС ПРИ ЗАГРУЗКЕ -->
+        <div class="status-hero <%= isSystemHealthy ? '' : 'issue' %>" id="global-status-panel">
+            <div class="sh-icon <%= isSystemHealthy ? 'pulse-green' : '' %>" id="global-status-icon">
+                <i class="fas <%= isSystemHealthy ? 'fa-check' : 'fa-exclamation-triangle' %>"></i>
+            </div>
+            <div class="sh-text">
+                <h1 id="global-status-title">
+                    <%= isSystemHealthy ? 'Все системы работают в штатном режиме' : 'Внимание: обнаружены проблемы в работе систем' %>
+                </h1>
+                <p>Последнее обновление: <span id="last-update-time">Только что</span></p>
+            </div>
+        </div>
+
+        <div class="services-stack">
+            
+            <!-- Сайт и API -->
+            <div class="service-card large-card">
+                <div class="sc-top">
+                    <div class="sc-info">
+                        <i class="fas fa-globe"></i>
+                        <div class="sc-titles">
+                            <h3>Сайт & Web API</h3>
+                            <span>dachazeyna.com</span>
+                        </div>
+                    </div>
+                    <!-- ДИНАМИЧЕСКИЙ БЕЙДЖ ДЛЯ САЙТА -->
+                    <div class="sc-badge <%= currentStatus.site %>" id="page-site-badge">
+                        <%= currentStatus.site === 'online' ? 'Онлайн' : 'Сбои' %>
+                    </div>
+                </div>
+                <div class="uptime-bar large-bar">
+                    <% uptimeData.site.forEach(day => { %>
+                        <div class="ub-day <%= day.status %>" title="<%= day.title %>"></div>
+                    <% }) %>
+                </div>
+                <div class="sc-metrics">
+                    <div class="metric">
+                        <span>Задержка (Event Loop)</span>
+                        <strong id="page-site-ping">-- ms</strong>
+                    </div>
+                    <div class="metric right-align">
+                        <span>Аптайм 30 дней</span>
+                        <strong><%= uptimeData.sitePct %>%</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discord Бот -->
+            <div class="service-card large-card">
+                <div class="sc-top">
+                    <div class="sc-info">
+                        <i class="fab fa-discord"></i>
+                        <div class="sc-titles">
+                            <h3>Discord Бот</h3>
+                            <span>Шлюз & Игровой клиент</span>
+                        </div>
+                    </div>
+                    <!-- ДИНАМИЧЕСКИЙ БЕЙДЖ ДЛЯ БОТА -->
+                    <div class="sc-badge <%= currentStatus.bot %>" id="page-bot-badge">
+                        <%= currentStatus.bot === 'online' ? 'Онлайн' : 'Сбои' %>
+                    </div>
+                </div>
+                <div class="uptime-bar large-bar">
+                    <% uptimeData.bot.forEach(day => { %>
+                        <div class="ub-day <%= day.status %>" title="<%= day.title %>"></div>
+                    <% }) %>
+                </div>
+                <div class="sc-metrics">
+                    <div class="metric">
+                        <span>Задержка Discord API</span>
+                        <strong id="page-bot-ping">-- ms</strong>
+                    </div>
+                    <div class="metric right-align">
+                        <span>Аптайм 30 дней</span>
+                        <strong><%= uptimeData.botPct %>%</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- База данных -->
+            <div class="service-card large-card">
+                <div class="sc-top">
+                    <div class="sc-info">
+                        <i class="fas fa-database"></i>
+                        <div class="sc-titles">
+                            <h3>База Данных</h3>
+                            <span>MongoDB Cluster</span>
+                        </div>
+                    </div>
+                    <!-- ДИНАМИЧЕСКИЙ БЕЙДЖ ДЛЯ БД -->
+                    <div class="sc-badge <%= currentStatus.database %>" id="page-db-badge">
+                        <%= currentStatus.database === 'online' ? 'Онлайн' : 'Сбои' %>
+                    </div>
+                </div>
+                <div class="uptime-bar large-bar">
+                    <% uptimeData.database.forEach(day => { %>
+                        <div class="ub-day <%= day.status %>" title="<%= day.title %>"></div>
+                    <% }) %>
+                </div>
+                <div class="sc-metrics">
+                    <div class="metric">
+                        <span>Отклик кластера</span>
+                        <strong id="page-db-ping">-- ms</strong>
+                    </div>
+                    <div class="metric right-align">
+                        <span>Аптайм 30 дней</span>
+                        <strong><%= uptimeData.dbPct %>%</strong>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="incidents-section">
+            <h2>История инцидентов (30 дней)</h2>
+            
+            <% if (incidents && incidents.length > 0) { %>
+                <% incidents.forEach(inc => { %>
+                    <div class="incident-item <%= inc.resolved ? 'resolved' : 'active' %>">
+                        <div class="inc-header">
+                            <div class="inc-date">
+                                <%= new Date(inc.createdAt).toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) %>
+                                <% if (!inc.resolved) { %>
+                                    <span class="pulse-red-dot">В процессе</span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="inc-content">
+                            <h4><%= inc.service === 'bot' ? 'Сбой Discord Бота' : (inc.service === 'database' ? 'Сбой Базы Данных' : 'Сбой Сайта') %></h4>
+                            <p><%= inc.message %></p>
+                            
+                            <% if (inc.resolved && inc.resolvedAt) { %>
+                                <div class="inc-resolution">
+                                    <i class="fas fa-check-circle"></i> Восстановлено: <%= new Date(inc.resolvedAt).toLocaleTimeString('ru-RU') %>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="incident-item no-issues">
+                    <i class="fas fa-check-circle"></i> За последние 30 дней сбоев не зафиксировано.
+                </div>
+            <% } %>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>
+<script src="/js/status-socket.js"></script>

@@ -8,12 +8,14 @@ import passport from 'passport';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import compression from 'compression';
+import minify from 'express-minify';
 import helmet from 'helmet'; 
 import crypto from 'crypto';
 import MongoStore from 'connect-mongo';
 import { Strategy as DiscordStrategy } from 'passport-discord';
 import UserProfile from './src/models/UserProfile.js';
 import Notification from './src/models/Notification.js';
+import SystemStatus from './src/models/SystemStatus.js';
 import pagesRouter from './routes/pages.js';
 import apiRouter from './routes/api.js';
 import authRouter from './routes/auth.js';
@@ -51,6 +53,7 @@ const io = new Server(httpServer, {
 
 app.set('io', io);
 app.use(compression());
+app.use(minify());
 
 app.use((req, res, next) => {
     res.locals.nonce = crypto.randomBytes(16).toString('hex'); 
@@ -163,16 +166,16 @@ app.use((req, res, next) => {
         res.setHeader('Expires', '0');
 
         const allowedPaths = ['/banned', '/api/appeal', '/auth/logout'];
-        if (allowedPaths.includes(req.path)) {
-            return next();
-        }
-
-        if (req.path.startsWith('/api/')) {
-            return res.status(403).json({ error: 'Ваш аккаунт заблокирован.' });
-        }
-        
-        return res.redirect('/banned');
+        if (allowedPaths.includes(req.path) || req.path.startsWith('/css/') || req.path.startsWith('/js/')) {
+        return next();
     }
+
+    if (req.path.startsWith('/api/')) {
+        return res.status(403).json({ error: 'Ваш аккаунт заблокирован' });
+    }
+    
+    return res.redirect('/banned');
+}
 
     next();
 });
@@ -203,7 +206,9 @@ app.use(async (req, res, next) => {
 app.use(async (req, res, next) => {
     const start = Date.now();
     try {
-        if (mongoose.connection.readyState === 1) await mongoose.connection.db.admin().ping();
+        if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+            await mongoose.connection.db.admin().ping();
+        }
         res.locals.systemStatus = { online: true, ping: Date.now() - start };
     } catch (e) { res.locals.systemStatus = { online: false, ping: 999 }; }
     next();
@@ -261,10 +266,11 @@ passport.use(new DiscordStrategy({
                 isBanned: true
             });
             
-            if (bannedByFp) {
-                console.log(`🚫 Твинк обнаружен по железу (${profile.username})`);
-                return done(null, false, { message: 'BANNED_ALT' });
+            if (bannedByFp && bannedByFp.userId !== profile.id) {
+                console.log(`🚫 Твинк обнаружен по железу (${profile.username})!`);
+                return done(null, false, { message: 'BANNED_HWID' }); 
             }
+            
         }
 
         if (ip) {
@@ -395,6 +401,99 @@ app.use((err, req, res, next) => {
     res.status(500).render('500', { user: req.user, error: err });
 });
 
+
+setInterval(async () => {
+    try {
+        const response = await fetch(`https://discord.com/api/v10/guilds/${process.env.GUILD_ID}?with_counts=true`, {
+            headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.approximate_presence_count) {
+                io.emit('stats_update', { onlineMembers: data.approximate_presence_count });
+            }
+        }
+    } catch (err) {}
+}, 60000); 
+
+let previousState = { bot: 'online', database: 'online' };
+
+setInterval(async () => {
+    let currentStatus = {
+        site: 'online', 
+        bot: 'offline', 
+        database: 'offline',
+        serverPing: 0,
+        botPing: 0,
+        dbPing: 0
+    };
+
+    try {
+        const dbStart = Date.now();
+        if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+            await mongoose.connection.db.admin().ping();
+            currentStatus.database = 'online';
+            currentStatus.dbPing = Date.now() - dbStart;
+        }
+    } catch (e) {
+        console.error('Ошибка проверки БД:', e);
+    }
+
+    try {
+        if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+            const botStatusDoc = await mongoose.connection.db.collection('system_status').findOne({ id: 'discord_bot' });
+            if (!botStatusDoc || (Date.now() - botStatusDoc.lastPulse > 15000)) {
+                currentStatus.bot = 'offline';
+            } else {
+                const botStart = Date.now();
+                const response = await fetch(`https://discord.com/api/v10/users/@me`, {
+                    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` }
+                });
+                if (response.ok) {
+                    currentStatus.bot = 'online';
+                    currentStatus.botPing = Date.now() - botStart;
+                }
+            }
+        }
+    } catch (e) {
+        currentStatus.bot = 'offline';
+    }
+
+    const serverStart = Date.now();
+    await new Promise(resolve => setImmediate(resolve));
+    currentStatus.serverPing = Date.now() - serverStart;
+    if (currentStatus.serverPing === 0) currentStatus.serverPing = 1; 
+
+    if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+        const services = ['bot', 'database'];
+        for (const service of services) {
+            if (currentStatus[service] === 'offline' && previousState[service] === 'online') {
+                const sName = service === 'bot' ? 'Discord бота' : 'Базы Данных';
+                await SystemStatus.create({
+                    type: 'incident',
+                    service: service,
+                    status: 'offline',
+                    message: `Автоматическое обнаружение: сбой в работе ${sName}. Система не отвечает на запросы.`
+                }).catch(()=>null);
+            } 
+            else if (currentStatus[service] === 'online' && previousState[service] === 'offline') {
+                await SystemStatus.findOneAndUpdate(
+                    { type: 'incident', service: service, resolved: false },
+                    { resolved: true, resolvedAt: Date.now() },
+                    { sort: { createdAt: -1 } }
+                ).catch(()=>null);
+            }
+        }
+        previousState = { bot: currentStatus.bot, database: currentStatus.database };
+    }
+
+    io.emit('system_update', currentStatus);
+    
+}, 300000);
+
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
+    console.log(`[🚀] Сервер успешно запущен на порту ${PORT}`);
+    console.log(`[🌐] Адрес: http://localhost:${PORT}`);
 });

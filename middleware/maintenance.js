@@ -1,8 +1,9 @@
 export const checkMaintenance = (req, res, next) => {
     const lockedPages = [
         '/leaderboard',
+        '/shop',
         '/bot',
-        '/profile',
+        '/profile/',
         '/giveaways',
         '/daily',
         '/inventory'

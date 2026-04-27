@@ -1,311 +1,272 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <%- include('partials/head', { title: 'Система Организатор | Дача Зейна' }) %>
-<link rel="preload" href="/css/bot.css" as="style">
+    <%- include('partials/head', { title: 'Бот Организатор | Дача Зейна' }) %>
+    <link rel="preload" href="/css/bot.css" as="style">
     <link rel="stylesheet" href="/css/bot.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
-<body>
+<body class="bot-page-body">
     <%- include('partials/navbar') %>
 
-    <section class="bot-hero">
-        <div class="hero-content">
-    <div class="sys-badge">
-        <span class="dot green"></span> СИСТЕМА ОНЛАЙН
+    <div class="bot-ambient-bg">
+        <div class="ambient-orb orb-1"></div>
+        <div class="ambient-orb orb-2"></div>
+        <div class="ambient-orb orb-3"></div>
+        <div class="ambient-noise"></div>
     </div>
-    <h1 class="animate-appear"><span class="text-gradient">ОРГАНИЗАТОР</span></h1>
-            <p class="hero-desc">
-                Эксклюзивная разработка для нашего сервера. "Организатор" — это не просто бот, а экосистема, которая делает наше общение интересным, экономику живой, а ивенты — честными.
+
+    <!-- HERO БЛОК -->
+    <section class="b-hero">
+        <div class="b-hero-container">
+            <div class="b-hero-badge gs-reveal">
+                <div class="pulse-dot"></div>
+                <span>v3.0 АКТИВЕН</span>
+            </div>
+            <h1 class="b-hero-title gs-reveal">ОРГАНИЗАТОР</h1>
+            <p class="b-hero-desc gs-reveal">
+                Главный механизм Дачи Зейна. Это не просто бот для модерации, а полноценная RPG-система внутри Discord. Экономика, сезоны, крафт и мини-игры, завязанные на твоей активности в чатах.
             </p>
-            
-            <div class="hero-actions">
-                <a href="/profile" class="btn-primary big glow-effect">
-                    <i class="fas fa-user-circle"></i> Мой Профиль
-                </a>
-                <a href="/leaderboard" class="btn-secondary big">
-                    <i class="fas fa-trophy"></i> Топ Игроков
-                </a>
+            <div class="b-hero-actions gs-reveal">
+                <a href="#battlepass" class="b-btn b-btn-primary">Смотреть фичи</a>
+                <a href="/profile" class="b-btn b-btn-glass"><i class="fas fa-user"></i> Мой профиль</a>
             </div>
         </div>
-
-        <div class="system-monitor-wrapper" data-aos="fade-left">
-            <div class="system-monitor">
-                <div class="monitor-header">
-                    <div class="win-title"><i class="fas fa-server"></i> organizer_core.exe @ dacha_zeyna</div>
-                    <div class="win-controls"><span></span><span></span><span></span></div>
+        <!-- Визуализация бота в Hero -->
+        <div class="b-hero-visual gs-reveal">
+            <div class="b-terminal">
+                <div class="b-term-header">
+                    <span>organizer_core.exe</span>
+                    <div class="b-term-dots"><i></i><i></i><i></i></div>
                 </div>
-                <div class="monitor-body">
-                    <div class="monitor-grid">
-                        <div class="m-card">
-                            <div class="m-label">SERVER</div>
-                            <div class="m-val">ДАЧА ЗЕЙНА</div>
-                            <div class="m-bar"><div class="fill" style="width: 100%"></div></div>
-                        </div>
-                        <div class="m-card">
-                            <div class="m-label">STATUS</div>
-                            <div class="m-val success">ЗАЩИЩЁН</div>
-                            <div class="m-bar"><div class="fill success" style="width: 100%"></div></div>
-                        </div>
-                    </div>
-                    <div class="console-output" id="consoleText">
-                        <p><span class="time">[SYS]</span> Access granted. Welcome, Resident.</p>
-                        <p><span class="time">[ECO]</span> Market volatility: <span class="warn">HIGH</span></p>
-                        <p><span class="time">[LOG]</span> <span class="item">New User</span> joined the voice channel.</p>
-                        <p><span class="time">[CMD]</span> Executing /profile...</p>
-                        <p class="typing-line"><span class="cursor">_</span></p>
-                    </div>
+                <div class="b-term-body">
+                    <p><span class="term-time">[12:00:01]</span> <span class="term-sys">SYS</span> Инициализация модулей...</p>
+                    <p><span class="term-time">[12:00:02]</span> <span class="term-eco">ECO</span> Загрузка инвентарей [OK]</p>
+                    <p><span class="term-time">[12:00:03]</span> <span class="term-usr">USR</span> Пользователь получил +15 XP за Voice</p>
+                    <p class="term-cursor">></p>
                 </div>
-            </div>
-            <div class="monitor-glow"></div>
-        </div>
-    </section>
-
-        <section class="features-section">
-        <div class="section-title center" data-aos="fade-up">
-            <h2>Экосистема сервера</h2>
-            <p>Три кита, на которых держится геймплей</p>
-        </div>
-        
-        <div class="features-grid">
-            <div class="feat-card" data-aos="fade-up" data-aos-delay="100">
-                <div class="feat-icon color-1"><i class="fas fa-hammer"></i></div>
-                <h3>Крафт и инвентарь</h3>
-                <p>Собирайте ресурсы, создавайте редкие предметы на верстаке и используйте расходники для буста опыта.</p>
-            </div>
-            
-            <div class="feat-card" data-aos="fade-up" data-aos-delay="200">
-                <div class="feat-icon color-2"><i class="fas fa-chart-pie"></i></div>
-                <h3>Глобальный рынок</h3>
-                <p>Торгуйте акциями, следите за курсом валют и станьте богатейшим магнатом сервера.</p>
-            </div>
-            
-            <div class="feat-card" data-aos="fade-up" data-aos-delay="300">
-                <div class="feat-icon color-3"><i class="fas fa-shield-alt"></i></div>
-                <h3>Умная защита</h3>
-                <p>Автоматическая система предупреждений и мутов обеспечивает комфортное общение без токсичности.</p>
             </div>
         </div>
     </section>
 
-    <section class="showcase-section finance-mode">
-        <div class="bg-grid"></div>
-        
-        <div class="showcase-container">
-            <div class="showcase-text" data-aos="fade-right">
-                <div class="tag-label text-neon">ФИНАНСЫ</div>
-                <h2>Рынок акций <span class="h-badge">LIVE</span></h2>
-                <p class="lead">
-                    Экономика реагирует на каждый вздох. 
-                    Инвестируйте в $VOICE и $TXT, следите за трендами и богатейте вместе с друзьями.
-                </p>
-                <ul class="feature-list cyber-list">
-                    <li>
-                        <div class="f-icon-box"><i class="fas fa-chart-line"></i></div>
-                        <div><strong>Трейдинг:</strong> покупай дешево, продавай дорого.</div>
-                    </li>
-                    <li>
-                        <div class="f-icon-box"><i class="fas fa-robot"></i></div>
-                        <div><strong>Авто-брокер:</strong> умная система инфляции.</div>
-                    </li>
-                </ul>
-                <a href="/market" class="btn-cyber mt-20">
-                    <span class="btn-text">ОТКРЫТЬ ТЕРМИНАЛ</span>
-                </a>
-            </div>
-            
-            <div class="showcase-visual" data-aos="zoom-in">
-                <div class="cyber-terminal">
-                    <div class="ct-header">
-                        <div class="ct-buttons">
-                            <span class="ct-dot red"></span>
-                            <span class="ct-dot yellow"></span>
-                            <span class="ct-dot green"></span>
+    <!-- БОЕВОЙ ПРОПУСК -->
+    <section id="battlepass" class="b-pass-section">
+        <div class="b-container">
+            <div class="b-pass-content">
+                <div class="b-pass-text gs-fade-up">
+                    <div class="b-section-label">СЕЗОННАЯ СИСТЕМА</div>
+                    <h2 class="b-section-title">Боевой Пропуск</h2>
+                    <p class="b-text-main">
+                        Наша главная фича. Каждый квартал запускается новый сезон из 100 уровней. Никакого гринда мобов — ты получаешь опыт просто общаясь в голосовых и текстовых каналах, выполняя квесты и участвуя в ивентах.
+                    </p>
+                    <ul class="b-pass-list">
+                        <li>
+                            <i class="fas fa-gift"></i>
+                            <div>
+                                <strong>Горы лута</strong>
+                                <span>Виртуальная валюта, редкие ресурсы для крафта и эксклюзивные сезонные лутбоксы.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-route"></i>
+                            <div>
+                                <strong>Две ветки наград</strong>
+                                <span>Базовая ветка доступна всем бесплатно. Golden Pass дает доступ к премиум-наградам и уникальной косметике.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="b-pass-ui gs-fade-left">
+                    <div class="bp-ui-card">
+                        <div class="bp-ui-header">
+                            <div>
+                                <span class="bp-season-name">Летний Сезон</span>
+                                <div class="bp-level">УРОВЕНЬ 74</div>
+                            </div>
+                            <div class="bp-xp">2450 / 3000 XP</div>
                         </div>
-                        <div class="ct-title">MARKET_V2.exe</div>
-                        <div class="ct-status">● LIVE</div>
-                    </div>
-
-                    <div class="ct-screen">
-                        <div class="ct-grid-overlay"></div>
-                        <div class="ct-scanline"></div>
-
-                        <div class="ct-ticker-tape">
-                            <div class="tape-content">
-                                <span>$VOICE <span class="up">▲ 142.5</span></span>
-                                <span>$TXT <span class="down">▼ 89.2</span></span>
-                                <span>$IMG <span class="up">▲ 12.0</span></span>
-                                <span>$ROLE <span class="down">▼ 45.0</span></span>
+                        <div class="bp-bar-wrap">
+                            <div class="bp-bar"><div class="bp-fill" style="width: 74%"></div></div>
+                        </div>
+                        <div class="bp-rewards">
+                            <div class="bp-reward-item locked">
+                                <div class="bp-tier">73</div>
+                                <div class="bp-box"><i class="fas fa-box-open"></i></div>
+                            </div>
+                            <div class="bp-reward-item current">
+                                <div class="bp-tier">74</div>
+                                <div class="bp-box gold-glow"><i class="fas fa-gem"></i></div>
+                            </div>
+                            <div class="bp-reward-item future">
+                                <div class="bp-tier">75</div>
+                                <div class="bp-box"><i class="fas fa-crown"></i></div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                        <div class="ct-graph-area">
-                            <div class="graph-overlay-info">
-                                <div class="gi-item">
-                                    <label>ТЕКУЩАЯ ЦЕНА</label>
-                                    <strong>142.50 ⭐</strong>
+    <!-- ЛИЧНЫЕ ПРОФИЛИ -->
+    <section id="profile" class="b-profile-section">
+        <div class="b-container">
+            <div class="b-profile-content">
+                
+                <div class="b-profile-text gs-fade-up">
+                    <div class="b-section-label text-purple" style="border-color: rgba(155, 89, 182, 0.3); background: rgba(155, 89, 182, 0.05);">
+                        <i class="fas fa-id-card"></i> ТВОЕ ЛИЦО НА СЕРВЕРЕ
+                    </div>
+                    <h2 class="b-section-title">Кастомизация <br><span class="text-purple">профиля.</span></h2>
+                    <p class="b-text-main">
+                        Команда <code>/profile</code> — это твоя визитная карточка. Сделай её уникальной, украшай и следи за своей статистикой прямо в Discord.
+                    </p>
+                    
+                    <ul class="b-list-grid gs-stagger-profile">
+                        <li>
+                            <div class="m-icon-wrap bg-purple"><i class="fas fa-image"></i></div>
+                            <div>
+                                <strong>Фоны и Рамки</strong>
+                                <span>Выбивай сотни уникальных фонов и анимированных рамок из лутбоксов или покупай их в магазине.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="m-icon-wrap bg-blue"><i class="fas fa-chart-bar"></i></div>
+                            <div>
+                                <strong>Глубокая статистика</strong>
+                                <span>В карточке отображается всё: от уровня БП и баланса Звезд до статуса брака и репутации на сервере.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="m-icon-wrap bg-cyber"><i class="fas fa-sliders-h"></i></div>
+                            <div>
+                                <strong>Гибкие настройки</strong>
+                                <span>Управляй личными уведомлениями (ЛС), настраивай кастомные роли и цвета профиля в пару кликов.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="b-profile-visual gs-fade-left">
+                    <div class="profile-card-interactive" id="interactive-profile">
+                        <div class="p-card-bg" id="p-card-bg"></div>
+                        <div class="p-card-content">
+                            <div class="p-card-header">
+                                <div class="p-avatar-wrap">
+                                    <img src="/assets/img/avatars/1.png" alt="User Avatar" class="p-avatar-img">
+                                    <img src="" alt="Frame" class="p-avatar-frame" id="p-avatar-frame" style="opacity: 0;">
+                                </div>
+                                <div class="p-user-info">
+                                    <h3>nerkean</h3>
+                                    <span><i class="fas fa-crown text-gold"></i> Владелец</span>
                                 </div>
                             </div>
                             
-                            <svg viewBox="0 0 300 100" class="ct-svg">
-                                <line x1="0" y1="25" x2="300" y2="25" class="grid-line"/>
-                                <line x1="0" y1="50" x2="300" y2="50" class="grid-line"/>
-                                <line x1="0" y1="75" x2="300" y2="75" class="grid-line"/>
-
-                                <path d="M0,80 L30,75 L60,60 L90,65 L120,40 L150,50 L180,30 L210,35 L240,20 L270,25 L300,10" 
-                                      class="ct-path-line" />
-                                
-                                <path d="M0,80 L30,75 L60,60 L90,65 L120,40 L150,50 L180,30 L210,35 L240,20 L270,25 L300,10 V100 H0 Z" 
-                                      class="ct-path-fill" />
-
-                                <circle cx="120" cy="40" r="3" class="ct-point" />
-                                <circle cx="180" cy="30" r="3" class="ct-point delay-1" />
-                                <circle cx="240" cy="20" r="3" class="ct-point delay-2" />
-                                <circle cx="300" cy="10" r="5" class="ct-point-end" />
-                            </svg>
-                        </div>
-
-                        <div class="ct-footer">
-                            <div class="sys-msg">
-                                <span class="typing-anim">РАСЧЕТ ВОЛАТИЛЬНОСТИ...</span>
+                            <div class="p-card-stats">
+                                <div class="p-stat"><span>Уровень</span><strong>74</strong></div>
+                                <div class="p-stat"><span>Звёзды</span><strong>45.2k ⭐</strong></div>
+                                <div class="p-stat"><span>Репутация</span><strong class="text-green">+128</strong></div>
                             </div>
-                            <div class="load-bar">
-                                <div class="load-progress"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="showcase-section social-mode">
-        <div class="blob blob-1"></div>
-
-        <div class="showcase-container reverse">
-            <div class="showcase-visual" data-aos="fade-right">
-                <div class="visual-card social-hub">
-                    <div class="hub-profile">
-                        <div class="hub-banner"></div>
-                        <div class="hub-avatar">
-                           <img 
-    src="assets/img/avatars/default_avatar.png" 
-    alt="User Avatar" 
-    width="80" height="80"
-    loading="lazy"
->
-                            <div class="hub-status"></div>
-                        </div>
-                        <div class="hub-identity">
-                            <h3>Организатор</h3>
-                            <span class="hub-tag">@user • Бот</span>
-                        </div>
-                        <div class="hub-stats">
-                            <div class="hs-item">
-                                <b>150 ⭐</b> <small>Баланс</small>
-                            </div>
-                            <div class="hs-item">
-                                <b>+3</b> <small>Репутация</small>
-                            </div>
-                            <div class="hs-item">
-                                <b>Топ 1</b> <small>Место</small>
+                            
+                            <div class="p-card-badges">
+                                <img src="/assets/img/spring-icon.svg" title="Весенний ивент" alt="Badge" onerror="this.style.display='none'">
+                                <div style="width:28px; height:28px; background:rgba(255,255,255,0.1); border-radius:50%; border: 1px dashed rgba(255,255,255,0.2);"></div>
+                                <div style="width:28px; height:28px; background:rgba(255,255,255,0.1); border-radius:50%; border: 1px dashed rgba(255,255,255,0.2);"></div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="hub-marriage">
-                        <div class="hm-icon"><i class="fas fa-heart pulse-heart"></i></div>
-                        <div class="hm-content">
-                            <span class="hm-label">В отношениях с</span>
-                            <span class="hm-partner">Alina</span>
-                        </div>
-                        <div class="hm-bonus">+15% STARS</div>
-                    </div>
+                    <button class="b-btn b-btn-purple w-full mt-30" id="btn-random-profile" style="max-width: 420px;">
+                        <i class="fas fa-magic"></i> Сгенерировать дизайн
+                    </button>
                 </div>
-            </div>
-            
-            <div class="showcase-text" data-aos="fade-left">
-                <div class="tag-label text-pink">СОЦИУМ</div>
-                <h2>Твой цифровой статус</h2>
-                <p class="lead">
-                    Преврати профиль в визитную карточку. 
-                    Найди пару, чтобы получать бонусы к опыту и валюте.
-                </p>
-                <ul class="feature-list glass-list">
-                    <li>
-                        <i class="fas fa-id-card"></i>
-                        <span><strong>Профиль:</strong> настраиваемые фоны и рамки.</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-ring"></i>
-                        <span><strong>Браки:</strong> общий счет, приватные каналы и бонусы.</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-thumbs-up"></i>
-                        <span><strong>Репутация:</strong> заслужи уважение сервера.</span>
-                    </li>
-                </ul>
-                <a href="/profile" class="btn-glass mt-20">
-                    Мой профиль <i class="fas fa-arrow-right"></i>
-                </a>
+
             </div>
         </div>
     </section>
 
-    <section class="showcase-section quest-mode">
-        <div class="showcase-container">
-            <div class="showcase-text" data-aos="fade-right">
-                <div class="tag-label text-gold">ПРОГРЕСС</div>
-                <h2>Система достижений</h2>
-                <p class="lead">
-                    Всегда есть цель. Выполняй ежедневные задания, собирай уникальные медали и получай ресурсы для крафта.
-                </p>
-                <ul class="feature-list gold-list">
-                    <li>
-                        <div class="f-icon-box gold"><i class="fas fa-scroll"></i></div>
-                        <div><strong>Дейлики:</strong> 3 новых задания каждые 24 часа.</div>
-                    </li>
-                    <li>
-                        <div class="f-icon-box gold"><i class="fas fa-trophy"></i></div>
-                        <div><strong>Трофеи:</strong> редкие значки в профиль за подвиги.</div>
-                    </li>
-                </ul>
-                <a href="/profile" class="btn-gold mt-20">Мои задания</a>
-            </div>
-            
-            <div class="showcase-visual" data-aos="zoom-in">
-                <div class="visual-card quest-card wide">
-                    <div class="floating-medal">
-                        <i class="fas fa-medal"></i>
+    <!-- СИСТЕМА БРАКОВ -->
+    <section id="marriage" class="b-marriage-section">
+        <div class="b-container">
+            <div class="b-marriage-content">
+                <div class="b-marriage-text gs-fade-up">
+                    <div class="b-section-label text-pink" style="border-color: rgba(235, 69, 158, 0.3); background: rgba(235, 69, 158, 0.05);">
+                        <i class="fas fa-heart"></i> СИСТЕМА БРАКОВ
                     </div>
-                    <div class="qc-header">
-                        <span>QUEST_LOG</span>
-                        <div class="qc-timer"><i class="fas fa-clock"></i> 14:02:59</div>
+                    <h2 class="b-section-title">Играйте вместе.<br><span class="text-pink">Фармите больше.</span></h2>
+                    <p class="b-text-main">
+                        Сделайте предложение через команду <code>/marry</code>. Согласие партнера не только преобразит вашу карточку в профиле, но и откроет доступ к мощным парным механикам и общему бюджету.
+                    </p>
+                    
+                    <ul class="b-list-grid gs-stagger-marriage">
+                        <li>
+                            <div class="m-icon-wrap bg-love"><i class="fas fa-fire"></i></div>
+                            <div>
+                                <strong>Синхронизация (+50%)</strong>
+                                <span>Пишете в одном текстовом канале с разницей не более 5 минут? Вы оба получаете бонус +50% к Опыту и Звездам за каждое сообщение.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="m-icon-wrap bg-gold"><i class="fas fa-wallet"></i></div>
+                            <div>
+                                <strong>Семейный бюджет</strong>
+                                <span>Копите звезды на общем счете. Пополнение и вывод работают в пару кликов через кнопки в меню брака.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="m-icon-wrap bg-danger"><i class="fas fa-heart-broken"></i></div>
+                            <div>
+                                <strong>Цена развода</strong>
+                                <span>Подумайте дважды. При разрыве брака 20% от общего счета сжигается навсегда, а остаток делится ровно пополам.</span>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="b-dev-note gs-fade-up">
+                        <i class="fas fa-laptop-code"></i> В разработке: прокачка уровней отношений (Love XP).
                     </div>
-                    <div class="qc-grid">
-                        <div class="qc-item completed">
-                            <div class="qc-icon"><i class="fas fa-check"></i></div>
-                            <div class="qc-content">
-                                <div class="qc-top">
-                                    <span class="qc-title">Voice Walker</span>
-                                    <span class="qc-reward-badge">+50 ⭐</span>
+                </div>
+
+                <div class="b-marriage-visual gs-fade-left">
+                    <div class="m-card-mockup">
+                        <div class="m-card-bg">
+                            <i class="fas fa-ring bg-ring-1"></i>
+                            <i class="fas fa-ring bg-ring-2"></i>
+                        </div>
+                        
+                        <div class="m-card-header">СВИДЕТЕЛЬСТВО О БРАКЕ</div>
+                        <div class="m-card-users">
+                            <div class="m-user">
+                                <div class="m-avatar">
+                                    <img src="/assets/img/avatars/1.png" alt="User" onerror="this.src='/assets/img/avatars/default_avatar.png'">
                                 </div>
-                                <div class="qc-bar-wrap">
-                                    <div class="qc-bar" style="width: 100%; background: #2ecc71;"></div>
+                                <span>nerkean</span>
+                            </div>
+                            
+                            <div class="m-heart-pulse">
+                                <div class="heart-icon"><i class="fas fa-heart"></i></div>
+                                <div class="m-days">Вместе 145 дней</div>
+                            </div>
+                            
+                            <div class="m-user">
+                                <div class="m-avatar">
+                                    <img src="/assets/img/avatars/2.png" alt="Partner" onerror="this.src='/assets/img/avatars/default_avatar.png'">
                                 </div>
-                                <div class="qc-meta">60 / 60 мин</div>
+                                <span>Alina</span>
                             </div>
                         </div>
-                        <div class="qc-item active">
-                            <div class="qc-icon"><i class="fas fa-fire"></i></div>
-                            <div class="qc-content">
-                                <div class="qc-top">
-                                    <span class="qc-title">Chat Master</span>
-                                    <span class="qc-reward-badge">+100 ⭐</span>
-                                </div>
-                                <div class="qc-bar-wrap">
-                                    <div class="qc-bar" style="width: 65%; background: #ffd700;"></div>
-                                </div>
-                                <div class="qc-meta">325 / 500 сообщений</div>
+                        
+                        <div class="m-card-stats">
+                            <div class="m-stat-row">
+                                <span class="m-stat-label">Общий счет:</span>
+                                <strong class="text-gold">45,200 ⭐</strong>
+                            </div>
+                            <div class="m-stat-row">
+                                <span class="m-stat-label">Бонус активности:</span>
+                                <strong class="text-pink">АКТИВЕН (+50%)</strong>
                             </div>
                         </div>
                     </div>
@@ -314,116 +275,707 @@
         </div>
     </section>
 
-    <section class="showcase-section mining-mode centered">
-        <div class="container-center" data-aos="fade-up">
-            <div class="center-text">
-                <div class="tag-label text-blue">SMART MINING</div>
-                <h2>Экономика Общения</h2>
-                <p class="lead max-w-700">
-                    Система вознаграждает за живое общение, а не спам.
-                    Алгоритм учитывает длину сообщений, кулдауны и активность в войсе.
-                    <br>
-<span style="color: #fff; font-size: 0.9em;">
-    ✨ <a href="/shop?category=ПремиумView" class="premium-link">Premium</a> дает множитель x1.1 к заработку.
-</span>
+    <!-- ЭКОНОМИКА (3D НАСТОЯЩАЯ ЗВЕЗДА И ОРБИТА УЗЛОВ) -->
+    <section id="economy" class="b-economy-section">
+        <div class="b-container">
+            <div class="eco-header gs-fade-up">
+                <div class="b-section-label text-gold" style="border-color: rgba(241, 196, 15, 0.3); background: rgba(241, 196, 15, 0.05);">
+                    <i class="fas fa-star"></i> ОСНОВНАЯ ВАЛЮТА
+                </div>
+                <h2 class="b-section-title">Звёзды решают <span class="text-gold">всё.</span></h2>
+                <p class="b-text-main mx-auto">
+                    Фарми валюту за активность и победы в квестах. Это двигатель экономики нашего сервера, открывающий доступ к эксклюзивным функциям.
                 </p>
             </div>
 
-            <div class="center-visual">
-                <div class="mining-dashboard">
-                    <div class="md-card large">
-                        <div class="md-header">
-                            <div class="md-icon"><i class="fas fa-comment-alt"></i></div>
-                            <div class="md-title">ТКС. ОБЩЕНИЕ</div>
-                        </div>
-                        <div class="md-stat-row">
-                            <span class="label">Статус</span>
-                            <span class="val success">ACTIVE ●</span>
-                        </div>
-                        <div class="md-stat-row">
-                            <span class="label">Ставка</span>
-                            <span class="val">Dynamic ⭐</span>
-                        </div>
-                        <div class="md-graph">
-                            <div class="wave-line"></div>
+            <div class="eco-orbit-wrapper gs-fade-up">
+                <div class="eco-orbit-ring"></div>
+                
+                <!-- Контейнер для 3D Звезды -->
+                <div class="eco-3d-center">
+                    <div id="star-3d-canvas"></div>
+                </div>
+
+                <!-- Вращающийся контейнер узлов Орбиты -->
+                <div class="eco-nodes-container">
+                    
+                    <div class="eco-node-anchor node-1">
+                        <div class="eco-node">
+                            <i class="fas fa-palette"></i>
+                            <div class="eco-node-info">
+                                <h4>Кастомные роли</h4>
+                                <p>Покупка и покраска личных ролей</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="md-plus">
-                        <i class="fas fa-plus"></i>
-                    </div>
-
-                    <div class="md-card large">
-                        <div class="md-header">
-                            <div class="md-icon"><i class="fas fa-microphone-lines"></i></div>
-                            <div class="md-title">ГОЛ. ОБЩЕНИЕ</div>
-                        </div>
-                        <div class="md-stat-row">
-                            <span class="label">Сессия</span>
-                            <span class="val warning">00:42:15</span>
-                        </div>
-                        <div class="md-stat-row">
-                            <span class="label">Доход</span>
-                            <span class="val">+45.2 ⭐</span>
-                        </div>
-                        <div class="md-visualizer-big">
-                            <span></span><span></span><span></span><span></span><span></span><span></span>
+                    <div class="eco-node-anchor node-2">
+                        <div class="eco-node">
+                            <i class="fas fa-box-open"></i>
+                            <div class="eco-node-info">
+                                <h4>Лутбоксы</h4>
+                                <p>Покупка редких кейсов и ключей</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="md-result-block">
-                        <div class="md-res-label">ИТОГОВЫЙ КОШЕЛЁК</div>
-                        <div class="md-res-value">2,450.50 ⭐</div>
-                        <div class="md-res-sub">Готовы к инвестициям</div>
+                    <div class="eco-node-anchor node-3">
+                        <div class="eco-node">
+                            <i class="fas fa-ring"></i>
+                            <div class="eco-node-info">
+                                <h4>Свадьбы</h4>
+                                <p>Оплата пошлины при заключении брака</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="eco-node-anchor node-4">
+                        <div class="eco-node">
+                            <i class="fas fa-gavel"></i>
+                            <div class="eco-node-info">
+                                <h4>Аукционы</h4>
+                                <p>Ставки на уникальные рыночные лоты</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="eco-node-anchor node-5">
+                        <div class="eco-node">
+                            <i class="fas fa-flask"></i>
+                            <div class="eco-node-info">
+                                <h4>Крафт</h4>
+                                <p>Синтез бустеров и квантовых чипов</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ИНВЕНТАРЬ И КРАФТИНГ -->
+    <section id="crafting" class="b-craft-section">
+        <div class="b-container">
+            <div class="b-craft-content flex-reverse">
+                
+                <div class="b-craft-text gs-fade-up">
+                    <div class="b-section-label text-green" style="border-color: rgba(46, 204, 113, 0.3); background: rgba(46, 204, 113, 0.05);">
+                        <i class="fas fa-hammer"></i> СКЛАД И ВЕРСТАК
+                    </div>
+                    <h2 class="b-section-title">Собирай. <span class="text-green">Создавай.</span> Доминируй.</h2>
+                    <p class="b-text-main">
+                        Некоторые легендарные предметы нельзя просто купить. Ваш инвентарь — это база. Соберите базовые ресурсы, переплавьте их и соберите на верстаке сложные артефакты.
+                    </p>
+                    
+                    <ul class="b-list-grid gs-stagger-craft">
+                        <li>
+                            <div class="m-icon-wrap bg-blue"><i class="fas fa-backpack"></i></div>
+                            <div>
+                                <strong>Инвентарь и Лимиты</strong>
+                                <span>По умолчанию склад вмещает 10 уникальных предметов (косметика не занимает место). Из инвентаря открываются сундуки и надеваются роли.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="m-icon-wrap bg-green"><i class="fas fa-flask"></i></div>
+                            <div>
+                                <strong>Система Крафта</strong>
+                                <span>Объединяйте Железо, Дерево и Звездную пыль в слитки. Используйте Чипы и Энергетики для синтеза бустеров.</span>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="b-dev-note mt-30 gs-fade-up">
+                        <i class="fas fa-gem"></i> Подписка Patreon расширяет лимит склада до бесконечности.
+                    </div>
+                </div>
+
+                <div class="b-craft-visual gs-fade-right">
+                    <div class="craft-ui-wrapper">
+                        <!-- Инвентарь UI -->
+                        <div class="inv-header">
+                            <span>ИНВЕНТАРЬ</span>
+                            <span class="text-green">8 / 10 СЛОТОВ</span>
+                        </div>
+                        <div class="inv-grid">
+                            <div class="inv-slot filled" title="Железо">🪨 <span class="slot-qty">x12</span></div>
+                            <div class="inv-slot filled" title="Дерево">🪵 <span class="slot-qty">x5</span></div>
+                            <div class="inv-slot filled active-mat" title="Звездная пыль" id="mat-1">✨ <span class="slot-qty">x8</span></div>
+                            <div class="inv-slot filled active-mat" title="Кибер-чип" id="mat-2">💾 <span class="slot-qty">x2</span></div>
+                            <div class="inv-slot filled active-mat" title="Энергетик" id="mat-3">⚡ <span class="slot-qty">x5</span></div>
+                            <div class="inv-slot filled" title="Обычный кейс">📦 <span class="slot-qty">x1</span></div>
+                            <div class="inv-slot filled" title="Золотой ключ">🗝️ <span class="slot-qty">x3</span></div>
+                            <div class="inv-slot filled" title="Ускоритель XP">🚀 <span class="slot-qty">x1</span></div>
+                            <div class="inv-slot"></div>
+                            <div class="inv-slot"></div>
+                        </div>
+
+                        <!-- Верстак UI -->
+                        <div class="workbench-area">
+                            <div class="wb-title">[ КИБЕР-ВЕРСТАК v2.0 ]</div>
+                            <div class="wb-slots">
+                                <div class="wb-slot has-item" id="craft-slot-1">✨</div>
+                                <div class="wb-plus">+</div>
+                                <div class="wb-slot has-item" id="craft-slot-2">💾</div>
+                                <div class="wb-plus">+</div>
+                                <div class="wb-slot has-item" id="craft-slot-3">⚡</div>
+                                <div class="wb-result-arrow"><i class="fas fa-arrow-right"></i></div>
+                                <div class="wb-slot result" id="craft-result">
+                                    <div class="craft-glow"></div>
+                                    <span id="result-item" style="opacity: 0;">⚛️</span>
+                                </div>
+                            </div>
+                            <button class="b-btn b-btn-primary w-full" id="btn-craft" style="background: var(--b-green); box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);">
+                                <i class="fas fa-magic"></i> Запустить синтез
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- КВЕСТЫ (ТЕРМИНАЛ КОНТРАКТОВ) -->
+    <section id="quests" class="b-quests-section">
+        <div class="b-container">
+            <div class="b-quests-content">
+                <div class="b-quests-text gs-fade-up">
+                    <div class="b-section-label" style="border-color: rgba(52, 152, 219, 0.3); background: rgba(52, 152, 219, 0.05); color: var(--b-primary);">
+                        <i class="fas fa-clipboard-check"></i> СИСТЕМА КОНТРАКТОВ
+                    </div>
+                    <h2 class="b-section-title">Твои задачи <br>на каждый день.</h2>
+                    <p class="b-text-main">
+                        Через команду <code>/quests</code> бот выдает список заданий, разбитый на 3 тира. Это самый быстрый способ прокачать уровень Боевого Пропуска и заработать валюту.
+                    </p>
+
+                    <ul class="b-list-grid gs-stagger-quests mt-30">
+                        <li>
+                            <div class="m-icon-wrap bg-blue"><i class="fas fa-sun"></i></div>
+                            <div>
+                                <strong>Ежедневные (Daily)</strong>
+                                <span>3 случайных задания на сутки. Быстрые квесты вроде отправки сообщений или использования пары команд.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="m-icon-wrap bg-gold"><i class="fas fa-calendar-week"></i></div>
+                            <div>
+                                <strong>Еженедельные (Weekly)</strong>
+                                <span>Глобальные контракты на неделю: отыграть часы в войсе, открыть десяток кейсов. Огромная награда.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="m-icon-wrap bg-danger"><i class="fas fa-moon"></i></div>
+                            <div>
+                                <strong>Ежемесячные (Monthly)</strong>
+                                <span>Для самых активных игроков. Скрафтить 50 предметов, выиграть джекпот в казино и забрать уникальный лут.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="quest-terminal gs-fade-left">
+                    <div class="qt-header">
+                        <div class="qt-dots"><i></i><i></i><i></i></div>
+                        <span>SYS.QUEST_BOARD_v3</span>
+                    </div>
+                    <div class="qt-tabs">
+                        <div class="qt-tab active">DAILY</div>
+                        <div class="qt-tab">WEEKLY</div>
+                        <div class="qt-tab">MONTHLY</div>
+                    </div>
+                    <div class="qt-body" id="quest-container">
+                        <!-- Квесты рендерятся через JS -->
+                    </div>
+                    <div class="qt-footer">
+                        <button id="reroll-quests" class="b-btn b-btn-glass w-full">
+                            <i class="fas fa-sync-alt" id="reroll-icon"></i> Сгенерировать задания
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="cta-section epic">
-        <div class="warp-bg">
-            <div class="stars"></div>
-            <div class="stars-2"></div>
-            <div class="grid-horizon"></div>
-        </div>
+    <!-- МИНИ-ИГРЫ И КАЗИНО (АЗАРТ) -->
+    <section id="minigames" class="b-minigames-section">
+        <div class="b-container">
+            <div class="b-minigames-content flex-reverse">
+                
+                <div class="b-minigames-text gs-fade-up">
+                    <div class="b-section-label text-orange" style="border-color: rgba(230, 126, 34, 0.3); background: rgba(230, 126, 34, 0.05);">
+                        <i class="fas fa-dice"></i> АЗАРТ И РИСК
+                    </div>
+                    <h2 class="b-section-title">Удача любит<br><span class="text-orange">смелых.</span></h2>
+                    <p class="b-text-main">
+                        Надоело фармить часами? Рискни всем. Бот предлагает 3 уникальные мини-игры с шансом сорвать невероятный куш.
+                    </p>
 
-        <div class="cta-content" data-aos="zoom-in">
-            <div class="cta-badge">BSS COMMUNITY #1</div>
-            <h2 class="glitch-text" data-text="Добро пожаловать домой">Добро пожаловать домой</h2>
-            <p class="lead">"Дача Зейна" — место, где общение превращается в игру, а каждое событие — настоящее приключение.</p>
-            
-            <div class="cta-buttons">
-                <a href="https://discord.gg/bandazeyna" target="_blank" class="btn-primary big glow-btn">
-                    <span class="btn-icon"><i class="fab fa-discord"></i></span>
-                    <span>Присоединится к серверу</span>
-                </a>
+                    <div class="b-limit-warning gs-fade-up">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span><strong>Лимит Системы:</strong> Не более 20 игр суммарно в сутки на аккаунт. Умей вовремя остановиться.</span>
+                    </div>
+
+                    <ul class="b-list-grid gs-stagger-games mt-30">
+                        <li>
+                            <div class="m-icon-wrap bg-orange"><i class="fas fa-slot-machine"></i>🎰</div>
+                            <div>
+                                <strong>Слоты (/casino)</strong>
+                                <span>Классические игровые автоматы. Собери 3 одинаковых символа в ряд, чтобы забрать джекпот и озолотиться.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="m-icon-wrap bg-blue"><i class="fas fa-building"></i></div>
+                            <div>
+                                <strong>Небоскреб (/tower)</strong>
+                                <span>Поднимайся по этажам, выбирая правильные двери. Чем выше этаж — тем жирнее множитель. Оступишься — потеряешь всё.</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="m-icon-wrap bg-cyber"><i class="fas fa-terminal"></i></div>
+                            <div>
+                                <strong>Взлом сети (/hack)</strong>
+                                <span>Мини-игра в стиле "Сапёр". Требует предмет <em>Кибер-чип</em>. Открывай ячейки и копи множитель (до x100!). Нарвешься на бомбу — ставка сгорит.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="b-minigames-visual gs-fade-right">
+                    <div class="arcade-machine">
+                        <div class="arcade-top-glow"></div>
+                        <div class="arcade-screen">
+                            <div class="screen-scanlines"></div>
+                            <div class="arcade-slots">
+                                <div class="slot-win-line"></div>
+                                <div class="slot-reel"><div class="reel-strip reel-1">🍒<br>💎<br>7️⃣<br>🔔<br>🍒<br>💎</div></div>
+                                <div class="slot-reel"><div class="reel-strip reel-2">7️⃣<br>🍒<br>🔔<br>💎<br>7️⃣<br>🍒</div></div>
+                                <div class="slot-reel"><div class="reel-strip reel-3">💎<br>🔔<br>7️⃣<br>🍒<br>💎<br>🔔</div></div>
+                            </div>
+                            <div class="arcade-hack">
+                                <div class="hack-header">
+                                    <span class="text-cyber">[SYS.HACK]</span>
+                                    <span class="hack-mult">MULT: x14.5</span>
+                                </div>
+                                <div class="hack-grid">
+                                    <div class="h-cell safe">1.5</div>
+                                    <div class="h-cell hidden">?</div>
+                                    <div class="h-cell hidden">?</div>
+                                    <div class="h-cell safe">3.0</div>
+                                    <div class="h-cell bomb"><i class="fas fa-bomb"></i></div>
+                                    <div class="h-cell hidden">?</div>
+                                    <div class="h-cell safe">10.0</div>
+                                    <div class="h-cell hidden">?</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="arcade-panel">
+                            <div class="arcade-btn green"></div>
+                            <div class="arcade-btn red"></div>
+                            <div class="arcade-insert">INSERT COIN</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-            <div class="cta-stats">
-                <div class="cs-item">
-                    <i class="fas fa-shield-alt"></i> <span>БЕЗОПАСНО</span>
+        </div>
+    </section>
+
+    <!-- ПОДПИСКИ PATREON -->
+    <section class="b-patreon-section">
+        <div class="b-container">
+            <div class="b-section-header gs-fade-up text-center">
+                <div class="b-section-label">ПОДДЕРЖКА СЕРВЕРА</div>
+                <h2 class="b-section-title">Премиум статусы</h2>
+                <p class="b-text-main mx-auto">
+                    Проект живет и развивается благодаря комьюнити. Мы подготовили 3 уровня подписки с мощными бонусами внутри бота и сервера.
+                </p>
+            </div>
+
+            <div class="b-tiers-grid">
+                <div class="b-tier-card gs-tier" data-tier="1">
+                    <div class="tier-icon"><i class="fas fa-medkit"></i></div>
+                    <h3>Саппорт</h3>
+                    <div class="tier-price">2.50$ <span>/ мес</span></div>
+                    <p class="tier-desc">Для тех, кто помогает проекту работать без лагов и падений.</p>
+                    <ul class="tier-perks">
+                        <li><i class="fas fa-check"></i> Уникальная роль «Саппорт»</li>
+                        <li><i class="fas fa-check"></i> Блестящий бейдж в /profile</li>
+                        <li><i class="fas fa-check"></i> 10 000 ⭐ каждый месяц</li>
+                        <li><i class="fas fa-check"></i> Доступ в закрытый VIP-канал</li>
+                    </ul>
+                    <a href="https://patreon.com" target="_blank" class="b-btn b-btn-glass w-full">Оформить</a>
                 </div>
-                <div class="cs-divider"></div>
-                <div class="cs-item">
-                    <i class="fas fa-bolt"></i> <span>БЫСТРО</span>
+
+                <div class="b-tier-card b-tier-gold gs-tier" data-tier="2">
+                    <div class="tier-popular">ПОПУЛЯРНОЕ</div>
+                    <div class="tier-icon"><i class="fas fa-crown"></i></div>
+                    <h3>Золотой игрок</h3>
+                    <div class="tier-price">5.00$ <span>/ мес</span></div>
+                    <p class="tier-desc">Для тех, кто привык лутать самые сочные сундуки и закрывать БП на 100%.</p>
+                    <ul class="tier-perks">
+                        <li class="highlight"><i class="fas fa-star"></i> <strong>Golden Pass БЕСПЛАТНО</strong></li>
+                        <li><i class="fas fa-check"></i> Личная кастомная роль на 30 дней</li>
+                        <li><i class="fas fa-check"></i> Расширенный инвентарь</li>
+                        <li><i class="fas fa-check"></i> Всё из уровня «Саппорт»</li>
+                    </ul>
+                    <a href="https://patreon.com" target="_blank" class="b-btn b-btn-gold w-full">Стать золотым</a>
                 </div>
-                <div class="cs-divider"></div>
-                <div class="cs-item">
-                    <i class="fas fa-users"></i> <span>АКТИВ</span>
+
+                <div class="b-tier-card b-tier-boss gs-tier" data-tier="3">
+                    <div class="tier-icon"><i class="fas fa-dragon"></i></div>
+                    <h3>Финальный босс</h3>
+                    <div class="tier-price">10.00$ <span>/ мес</span></div>
+                    <p class="tier-desc">Статус для магнатов сервера. Эксклюзив, который нельзя выбить.</p>
+                    <ul class="tier-perks">
+                        <li class="highlight-boss"><i class="fas fa-image"></i> <strong>Личный кастомный фон профиля</strong></li>
+                        <li><i class="fas fa-check"></i> 50 000 ⭐ и редкие ключи</li>
+                        <li><i class="fas fa-check"></i> Безлимитный инвентарь</li>
+                        <li><i class="fas fa-check"></i> Всё из предыдущих уровней</li>
+                    </ul>
+                    <a href="https://patreon.com" target="_blank" class="b-btn b-btn-boss w-full">Стать боссом</a>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- ОСТАЛЬНЫЕ ФИЧИ БОТА (GRID) - БЕЗ БИРЖИ -->
+    <section class="b-features-section">
+        <div class="b-container">
+            <div class="b-section-header gs-fade-up">
+                <h2 class="b-section-title">И это только начало</h2>
+                <p class="b-text-main">Бот управляет огромным количеством систем, чтобы на сервере всегда было чем заняться.</p>
+            </div>
+
+            <!-- Идеальная сетка под 3 оставшихся элемента -->
+            <div class="b-feat-bento">
+                <!-- Рынок (Занимает половину ширины) -->
+                <div class="bento-box bento-medium gs-bento">
+                    <div class="bento-content">
+                        <i class="fas fa-gavel bento-icon text-gold"></i>
+                        <h3>Рынок и Торги</h3>
+                        <p>Выставляй редкие ресурсы на аукцион. Рынок контролируют сами игроки — кто предложит больше звезд, тот и заберет лот.</p>
+                    </div>
+                </div>
+
+                <!-- Мелкие карточки (Занимают по 1/4 ширины) -->
+                <div class="bento-box bento-small gs-bento">
+                    <div class="bento-content">
+                        <i class="fas fa-palette bento-icon" style="color: #1abc9c;"></i>
+                        <h3>Кастомные роли</h3>
+                        <p>Покупай личные роли, меняй их цвет и название прямо через удобное меню.</p>
+                    </div>
+                </div>
+
+                <div class="bento-box bento-small gs-bento">
+                    <div class="bento-content">
+                        <i class="fas fa-trophy bento-icon" style="color: #e67e22;"></i>
+                        <h3>Топы и Рейтинги</h3>
+                        <p>Соревнуйся с другими участниками сервера за звание самого богатого или активного.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CALL TO ACTION -->
+    <section class="b-cta-section gs-fade-up">
+        <div class="b-container text-center">
+            <h2 class="b-section-title">Готов ворваться?</h2>
+            <p class="b-text-main mx-auto mb-40">Авторизуйся на сайте через Discord, чтобы открыть полный доступ к своему инвентарю и профилю.</p>
+            <a href="/verify" class="b-btn b-btn-primary b-btn-large">
+                <i class="fab fa-discord"></i> Подключить аккаунт
+            </a>
         </div>
     </section>
 
     <%- include('partials/footer') %>
 
-<script nonce="<%= nonce %>">
-    document.addEventListener('DOMContentLoaded', () => {
-        if (typeof AOS !== 'undefined') {
-            AOS.init({ duration: 800, once: true, offset: 80 });
-        }
-    });
-</script>
+    <!-- ЛОГИКА АНИМАЦИЙ GSAP -->
+    <script nonce="<%= locals.nonce %>">
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            const heroTl = gsap.timeline();
+            heroTl.fromTo(".b-hero-badge", {y: -20, opacity: 0}, {y: 0, opacity: 1, duration: 0.6, ease: "back.out(1.7)"})
+                  .fromTo(".b-hero-title", {y: 30, opacity: 0}, {y: 0, opacity: 1, duration: 0.8, ease: "power3.out"}, "-=0.4")
+                  .fromTo(".b-hero-desc", {y: 30, opacity: 0}, {y: 0, opacity: 1, duration: 0.8, ease: "power3.out"}, "-=0.6")
+                  .fromTo(".b-hero-actions", {y: 20, opacity: 0}, {y: 0, opacity: 1, duration: 0.6, ease: "power2.out"}, "-=0.5")
+                  .fromTo(".b-hero-visual", {x: 50, opacity: 0, rotationY: 15}, {x: 0, opacity: 1, rotationY: 0, duration: 1, ease: "power3.out"}, "-=0.8");
+
+            gsap.utils.toArray('.gs-fade-up').forEach(element => {
+                gsap.fromTo(element, 
+                    { y: 50, opacity: 0 },
+                    { scrollTrigger: { trigger: element, start: "top 85%" }, y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+                );
+            });
+
+            gsap.fromTo(".b-pass-text", { x: -50, opacity: 0 }, { scrollTrigger: { trigger: ".b-pass-section", start: "top 75%" }, x: 0, opacity: 1, duration: 0.8, ease: "power3.out" });
+            gsap.fromTo(".b-pass-ui", { x: 50, opacity: 0 }, { scrollTrigger: { trigger: ".b-pass-section", start: "top 75%" }, x: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.2 });
+            
+            gsap.fromTo(".b-profile-visual", { x: 50, opacity: 0, rotationY: 15 }, { scrollTrigger: { trigger: ".b-profile-section", start: "top 75%" }, x: 0, opacity: 1, rotationY: 0, duration: 1, ease: "back.out(1.2)" });
+            gsap.fromTo(".gs-stagger-profile li", { x: -30, opacity: 0 }, { scrollTrigger: { trigger: ".gs-stagger-profile", start: "top 80%" }, x: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: "power2.out" });
+
+            gsap.fromTo(".b-marriage-visual", { x: 50, opacity: 0, rotationY: 15 }, { scrollTrigger: { trigger: ".b-marriage-section", start: "top 75%" }, x: 0, opacity: 1, rotationY: 0, duration: 1, ease: "back.out(1.2)" });
+            gsap.fromTo(".gs-stagger-marriage li", { x: -30, opacity: 0 }, { scrollTrigger: { trigger: ".gs-stagger-marriage", start: "top 80%" }, x: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: "power2.out" });
+            
+            gsap.fromTo(".eco-orbit-wrapper", { scale: 0.8, opacity: 0 }, { scrollTrigger: { trigger: ".b-economy-section", start: "top 75%" }, scale: 1, opacity: 1, duration: 1, ease: "back.out(1.2)" });
+            
+            gsap.fromTo(".b-craft-visual", { x: -50, opacity: 0, rotationY: -15 }, { scrollTrigger: { trigger: ".b-craft-section", start: "top 75%" }, x: 0, opacity: 1, rotationY: 8, duration: 1, ease: "back.out(1.2)" });
+            gsap.fromTo(".gs-stagger-craft li", { x: 30, opacity: 0 }, { scrollTrigger: { trigger: ".gs-stagger-craft", start: "top 80%" }, x: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: "power2.out" });
+
+            gsap.fromTo(".quest-terminal", { x: 50, opacity: 0, rotationY: 15 }, { scrollTrigger: { trigger: ".b-quests-section", start: "top 75%" }, x: 0, opacity: 1, rotationY: -5, duration: 1, ease: "back.out(1.2)" });
+            gsap.fromTo(".gs-stagger-quests li", { x: -30, opacity: 0 }, { scrollTrigger: { trigger: ".gs-stagger-quests", start: "top 80%" }, x: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: "power2.out" });
+
+            gsap.fromTo(".b-minigames-visual", { x: -50, opacity: 0, rotationY: -15 }, { scrollTrigger: { trigger: ".b-minigames-section", start: "top 75%" }, x: 0, opacity: 1, rotationY: 0, duration: 1, ease: "back.out(1.2)" });
+            gsap.fromTo(".gs-stagger-games li", { x: 30, opacity: 0 }, { scrollTrigger: { trigger: ".gs-stagger-games", start: "top 80%" }, x: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: "power2.out" });
+            
+            gsap.fromTo(".gs-tier", { y: 60, opacity: 0 }, { scrollTrigger: { trigger: ".b-patreon-section", start: "top 70%" }, y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: "back.out(1.2)" });
+            gsap.fromTo(".gs-bento", { scale: 0.9, opacity: 0, y: 30 }, { scrollTrigger: { trigger: ".b-features-section", start: "top 70%" }, scale: 1, opacity: 1, y: 0, duration: 0.7, stagger: 0.15, ease: "power3.out" });
+
+            gsap.to(".orb-1", { scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: true }, y: 200, ease: "none" });
+            gsap.to(".orb-2", { scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: true }, y: -200, ease: "none" });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnCraft = document.getElementById('btn-craft');
+            if(btnCraft) {
+                btnCraft.addEventListener('click', () => {
+                    if(btnCraft.disabled) return;
+                    btnCraft.disabled = true;
+                    btnCraft.innerHTML = '<i class="fas fa-cog fa-spin"></i> Синтез...';
+                    
+                    const slot1 = document.getElementById('craft-slot-1');
+                    const slot2 = document.getElementById('craft-slot-2');
+                    const slot3 = document.getElementById('craft-slot-3');
+                    const resultSlot = document.getElementById('craft-result');
+                    const resultItem = document.getElementById('result-item');
+                    
+                    gsap.to([slot1, slot2, slot3], { x: () => Math.random() * 6 - 3, y: () => Math.random() * 6 - 3, duration: 0.1, yoyo: true, repeat: 15 });
+                    
+                    setTimeout(() => {
+                        gsap.to([slot1, slot2, slot3], { scale: 0, opacity: 0, duration: 0.3 });
+                        
+                        setTimeout(() => {
+                            resultSlot.classList.add('crafted');
+                            gsap.to(resultItem, { opacity: 1, scale: 1.5, duration: 0.5, ease: "back.out(2)" });
+                            gsap.to(".craft-glow", { opacity: 1, duration: 0.3 });
+                            
+                            btnCraft.innerHTML = '<i class="fas fa-check"></i> Успех!';
+                            
+                            setTimeout(() => {
+                                resultSlot.classList.remove('crafted');
+                                gsap.to(resultItem, { opacity: 0, scale: 1, duration: 0.3 });
+                                gsap.to(".craft-glow", { opacity: 0, duration: 0.3 });
+                                gsap.to([slot1, slot2, slot3], { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.5)" });
+                                
+                                btnCraft.disabled = false;
+                                btnCraft.innerHTML = '<i class="fas fa-magic"></i> Запустить синтез';
+                            }, 3000);
+                        }, 300);
+                    }, 1500);
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const bgAssets = <%- JSON.stringify(locals.bgAssets ? locals.bgAssets : [
+                '/assets/backgrounds/halloween_pumpkins.webp',
+                '/assets/backgrounds/legend.webp',
+                '/assets/backgrounds/premium_card_bg_galaxy.webp',
+                '/assets/backgrounds/stars_dark.webp'
+            ]) %>;
+            
+            const frameAssets = <%- JSON.stringify(locals.frameAssets ? locals.frameAssets : [
+                '/assets/frames/avatar_frame_azure_spark.webp',
+                '/assets/frames/halloween_web.webp',
+                '/assets/frames/laurel_blue.webp',
+                '/assets/frames/patterned_bronze.webp',
+                '/assets/frames/premium_avatar_frame_gold_plated.webp',
+                '/assets/frames/veteran.webp'
+            ]) %>;
+
+            const btnProfile = document.getElementById('btn-random-profile');
+            const cardBg = document.getElementById('p-card-bg') || document.querySelector('.p-card-bg');
+            const cardFrame = document.getElementById('p-avatar-frame') || document.querySelector('.p-avatar-frame');
+
+            function setRandomProfile() {
+                if (!bgAssets.length || !frameAssets.length) return;
+                const randomBg = bgAssets[Math.floor(Math.random() * bgAssets.length)];
+                const randomFrame = frameAssets[Math.floor(Math.random() * frameAssets.length)];
+                if (cardBg) cardBg.style.backgroundImage = `url('${randomBg}')`;
+                if (cardFrame) {
+                    cardFrame.src = randomFrame;
+                    cardFrame.style.opacity = '1';
+                }
+            }
+
+            setRandomProfile();
+
+            if(btnProfile && cardBg && cardFrame) {
+                btnProfile.addEventListener('click', () => {
+                    const icon = btnProfile.querySelector('i');
+                    if(icon) icon.classList.add('fa-spin');
+
+                    gsap.fromTo("#interactive-profile",
+                        { scale: 0.96, opacity: 0.8, filter: "brightness(1.5) contrast(1.2)" },
+                        { scale: 1, opacity: 1, filter: "brightness(1) contrast(1)", duration: 0.6, ease: "power2.out" }
+                    );
+
+                    setTimeout(() => {
+                        setRandomProfile();
+                        if(icon) icon.classList.remove('fa-spin');
+                    }, 150);
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('star-3d-canvas');
+            if (!container) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 6;
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); 
+            container.appendChild(renderer.domElement);
+
+            const shape = new THREE.Shape();
+            const outerRadius = 1.4;
+            const innerRadius = 0.6;
+            const spikes = 5;
+            const rot = -Math.PI / 2;
+            
+            for (let i = 0; i < spikes * 2; i++) {
+                const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                const angle = rot + (i * Math.PI) / spikes;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                if (i === 0) shape.moveTo(x, y);
+                else shape.lineTo(x, y);
+            }
+            shape.closePath();
+
+            const extrudeSettings = { depth: 0.2, bevelEnabled: true, bevelSegments: 1, steps: 1, bevelSize: 0.1, bevelThickness: 0.1 };
+            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            geometry.center();
+
+            const material = new THREE.MeshStandardMaterial({
+                color: 0xffd700, emissive: 0xaa7700, emissiveIntensity: 0.3, metalness: 0.8, roughness: 0.15
+            });
+            const star = new THREE.Mesh(geometry, material);
+            scene.add(star);
+
+            const edges = new THREE.EdgesGeometry(geometry);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
+            const wireframe = new THREE.LineSegments(edges, lineMat);
+            star.add(wireframe);
+
+            const particleGeo = new THREE.BufferGeometry();
+            const particleCount = 70;
+            const posArray = new Float32Array(particleCount * 3);
+            for(let i=0; i < particleCount * 3; i++) posArray[i] = (Math.random() - 0.5) * 8;
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particleMat = new THREE.PointsMaterial({ size: 0.06, color: 0xffd700, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+            const particleMesh = new THREE.Points(particleGeo, particleMat);
+            scene.add(particleMesh);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+            const pointLight1 = new THREE.PointLight(0xffffff, 1.5, 100);
+            pointLight1.position.set(5, 5, 5);
+            scene.add(pointLight1);
+            const pointLight2 = new THREE.PointLight(0xffaa00, 2, 100);
+            pointLight2.position.set(-5, -5, 2);
+            scene.add(pointLight2);
+
+            let clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime();
+                star.rotation.y += 0.008;
+                star.position.y = Math.sin(t * 1.5) * 0.15;
+                particleMesh.rotation.y -= 0.002;
+                particleMesh.rotation.x += 0.001;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                if(!container) return;
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const allQuests = [
+                { icon: "fa-comment-dots", title: "Социальная бабочка", desc: "Написать 100 сообщений в чатах", req: "0 / 100", reward: "+300 XP" },
+                { icon: "fa-microphone", title: "Радиоведущий", desc: "Провести 1 час в голосовых каналах", req: "0 / 60 мин", reward: "+500 XP" },
+                { icon: "fa-box-open", title: "Охотник за лутом", desc: "Открыть 10 любых кейсов", req: "0 / 10", reward: "+200 ⭐" },
+                { icon: "fa-hammer", title: "Мастер на все руки", desc: "Скрафтить 50 предметов на верстаке", req: "0 / 50", reward: "+450 XP" },
+                { icon: "fa-calendar-check", title: "Дисциплина", desc: "Забрать ежедневную награду (/daily)", req: "0 / 1", reward: "+100 ⭐" },
+                { icon: "fa-dice", title: "Азартный игрок", desc: "Сыграть 5 раз в казино", req: "0 / 5", reward: "+150 XP" },
+                { icon: "fa-ring", title: "Романтик", desc: "Отправить 5 поцелуев партнеру", req: "0 / 5", reward: "+100 XP" },
+                { icon: "fa-gavel", title: "Спекулянт", desc: "Выставить 3 лота на аукцион", req: "0 / 3", reward: "+300 ⭐" }
+            ];
+
+            const container = document.getElementById('quest-container');
+            const btn = document.getElementById('reroll-quests');
+            const icon = document.getElementById('reroll-icon');
+
+            function renderQuests(animate = false) {
+                const shuffled = [...allQuests].sort(() => 0.5 - Math.random());
+                const selected = shuffled.slice(0, 3);
+                
+                container.innerHTML = '';
+                
+                selected.forEach((q, index) => {
+                    const randomPerc = Math.floor(Math.random() * 70); 
+                    const card = document.createElement('div');
+                    card.className = 'quest-card';
+                    card.innerHTML = `
+                        <div class="quest-icon"><i class="fas ${q.icon}"></i></div>
+                        <div class="quest-info">
+                            <div class="quest-title">${q.title}</div>
+                            <div class="quest-desc">${q.desc}</div>
+                            <div class="quest-progress-wrap">
+                                <div class="q-bar-bg"><div class="q-bar-fill" style="width: 0%"></div></div>
+                                <span class="q-req">${q.req}</span>
+                            </div>
+                        </div>
+                        <div class="quest-reward">${q.reward}</div>
+                    `;
+                    container.appendChild(card);
+
+                    if(animate) {
+                        gsap.fromTo(card, { x: 30, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, delay: index * 0.1 });
+                        setTimeout(() => { card.querySelector('.q-bar-fill').style.width = randomPerc + '%'; }, 500 + (index * 100));
+                    } else {
+                        card.querySelector('.q-bar-fill').style.width = randomPerc + '%';
+                    }
+                });
+            }
+
+            renderQuests();
+
+            btn.addEventListener('click', () => {
+                if(icon.classList.contains('fa-spin')) return;
+                icon.classList.add('fa-spin');
+                
+                gsap.to(".quest-card", { 
+                    x: -30, opacity: 0, duration: 0.3, stagger: 0.05, 
+                    onComplete: () => {
+                        renderQuests(true);
+                        setTimeout(() => icon.classList.remove('fa-spin'), 1000);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

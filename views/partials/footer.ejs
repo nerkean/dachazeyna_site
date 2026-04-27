@@ -1,17 +1,27 @@
 <footer class="cyber-footer">
-    <div class="footer-hex-bg"></div>
-    <div class="footer-glow-top"></div>
+    <div class="footer-hex-grid"></div>
+    
+    <div class="footer-particles">
+        <div class="f-part p1"></div><div class="f-part p2"></div>
+        <div class="f-part p3"></div><div class="f-part p4"></div>
+        <div class="f-part p5"></div><div class="f-part p6"></div>
+    </div>
+
+    <div class="footer-glow-top">
+        <div class="glow-runner"></div>
+    </div>
 
     <div class="footer-container">
         <div class="footer-top">
             
             <div class="f-col brand-col">
-                <div class="f-logo">
-                   <img src="/assets/img/spring-icon.svg" alt="Лого" class="custom-logo-icon"> ДАЧА ЗЕЙНА
-                </div>
+                <a href="/" class="f-logo">
+                   <img src="/assets/img/spring-icon.svg" alt="Лого" class="custom-logo-icon float-anim"> 
+                   <span class="logo-text-gradient shine-effect">ДАЧА ЗЕЙНА</span>
+                </a>
                 <p class="f-desc">
                     Главное русскоязычное сообщество по Bee Swarm Simulator. 
-                    Торгуй, общайся и развивайся вместе с нами.
+                    Торгуй, общайся, читай гайды и развивайся вместе с нами.
                 </p>
                 <div class="f-socials">
                     <a href="https://discord.gg/bandazeyna" target="_blank" class="social-btn discord" title="Discord" aria-label="Discord">
@@ -27,34 +37,53 @@
             </div>
 
             <div class="f-col links-col">
-                <div class="f-heading">Навигация</div>
-                
-                <a href="/">Главная</a>
-                <a href="/wiki">📚 База Знаний</a>
-                <a href="/leaderboard">🏆 Топ Игроков</a>
-                <a href="/bot">🤖 О Боте</a> 
+                <div class="f-heading"><i class="fas fa-compass"></i> Навигация</div>
+                <ul class="footer-links">
+                    <li><a href="/">Главная</a></li>
+                    <li><a href="/wiki">База Знаний</a></li>
+                    <li><a href="/leaderboard">Топ Игроков</a></li>
+                    <li><a href="/bot">О Боте</a></li>
+                </ul>
             </div>
 
             <div class="f-col links-col">
-                <div class="f-heading">Личное</div>
-
-                <a href="/profile">👤 Мой Профиль</a>
-                <a href="/inventory">🎒 Инвентарь</a>
-                <a href="/daily">📅 Ежедневные</a>
-                <a href="/giveaways" style="color: #FFD700; font-weight: 700; margin-top: 10px;">
-                    <i class="fas fa-gift"></i> Халява
-                </a>
+                <div class="f-heading"><i class="fas fa-user-astronaut"></i> Игроку</div>
+                <ul class="footer-links">
+                    <li><a href="/profile">Мой Профиль</a></li>
+                    <li><a href="/inventory">Инвентарь</a></li>
+                    <li><a href="/daily">Ежедневные награды</a></li>
+                    <li><a href="/giveaways" class="highlight-giveaway"><i class="fas fa-gift"></i> Халява</a></li>
+                </ul>
             </div>
+
+            <div class="f-col status-col">
+    <div class="f-heading"><i class="fas fa-server"></i> Статус системы</div>
+    <a href="/status" class="system-status-box" style="display: block; text-decoration: none; cursor: pointer; transition: 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+        <div class="status-indicator">
+            <div class="status-dot pulse-green" id="f-bot-dot"></div>
+            <span>Discord Бот: <strong id="f-bot-text">Онлайн</strong></span>
+        </div>
+        <div class="status-indicator">
+            <div class="status-dot pulse-green" id="f-site-dot"></div>
+            <span>Сайт & API: <strong id="f-site-text">Онлайн</strong></span>
+        </div>
+        <div class="status-ping">
+            <i class="fas fa-network-wired"></i> Сервер: <span id="f-server-ping" style="color: #2ecc71;">--ms</span>
+        </div>
+    </a>
+    </div>
 
         </div>
 
+        <div class="footer-divider"></div>
+
         <div class="footer-bottom">
             <div class="fb-left">
-                <p>&copy; <%= new Date().getFullYear() %> Dacha Zayna. Not affiliated with Roblox Corp.</p>
+                <p>&copy; <%= new Date().getFullYear() %> Dacha Zeyna. Not affiliated with Roblox Corp.</p>
             </div>
             <div class="fb-right">
-                <a href="/terms">Условия</a>
-                <span class="sep">•</span>
+                <a href="/terms">Условия использования</a>
+                <span class="sep"></span>
                 <a href="/privacy">Конфиденциальность</a>
             </div>
         </div>
